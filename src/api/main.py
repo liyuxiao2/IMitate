@@ -25,7 +25,8 @@ class ChatRequest(BaseModel):
 
 @app.post("/chat")
 async def chat_endpoint(request: ChatRequest):
-    gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key={GEMINI_API_KEY}"
+    gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={GEMINI_API_KEY}"
+
 
     headers = {"Content-Type": "application/json"}
     body = {
@@ -40,6 +41,13 @@ async def chat_endpoint(request: ChatRequest):
         response = await client.post(gemini_url, json=body, headers=headers)
         data = response.json()
 
-    # Extract response text
-    reply = data.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", "")
+    print("🔍 Gemini raw response:", data)
+
+    reply = ""
+    try:
+        reply = data["candidates"][0]["content"]["parts"][0]["text"]
+    except Exception as e:
+        print("⚠️ Failed to parse Gemini response:", e)
+
     return {"reply": reply or "Sorry, I couldn't generate a response."}
+

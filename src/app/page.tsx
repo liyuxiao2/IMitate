@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { User, Bot, Send, Mic, MicOff } from "lucide-react"
+import ReactMarkdown from "react-markdown"
+
 
 interface Message {
   id: string
@@ -43,22 +45,21 @@ export default function ChatBot() {
     setMessages((prev) => [...prev, newMessage])
   }
 
-  const generateBotResponse = (userInput: string): string => {
-    const lowerInput = userInput.toLowerCase()
+  const fetchGeminiResponse = async (userInput: string): Promise<string> => {
+    try {
+      const res = await fetch("http://localhost:8000/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: userInput }),
+      })
 
-    // Simple response logic - you can expand this
-    if (lowerInput.includes("hello") || lowerInput.includes("hi")) {
-      return "Hello! How can I assist you with your medical education today?"
-    } else if (lowerInput.includes("help")) {
-      return "I'm here to help with medical education topics. You can ask me about symptoms, diagnoses, medical procedures, or general medical knowledge."
-    } else if (lowerInput.includes("symptom")) {
-      return "I can help you understand various symptoms and their potential causes. What specific symptoms would you like to discuss?"
-    } else if (lowerInput.includes("diagnosis")) {
-      return "Diagnosis is a crucial skill in medicine. Would you like to practice with a case study or learn about diagnostic approaches?"
-    } else if (lowerInput.includes("thank")) {
-      return "You're welcome! I'm always here to help with your medical education journey."
-    } else {
-      return "That's an interesting question! Could you provide more details so I can give you a more specific answer?"
+      if (!res.ok) throw new Error("Gemini API error")
+
+      const data = await res.json()
+      return data.reply || "Sorry, I couldn't generate a response."
+    } catch (error) {
+      console.error("Error calling FastAPI:", error)
+      return "Oops! Something went wrong."
     }
   }
 
@@ -74,15 +75,14 @@ export default function ChatBot() {
     // Show typing indicator
     setIsTyping(true)
 
-    // Simulate bot thinking time
-    setTimeout(
-      () => {
-        const response = generateBotResponse(userInput)
-        addMessage("bot", response)
-        setIsTyping(false)
-      },
-      1000 + Math.random() * 1000,
-    ) // Random delay between 1-2 seconds
+    try {
+      const response = await fetchGeminiResponse(userInput)
+      addMessage("bot", response)
+    } catch {
+      addMessage("bot", "Sorry, something went wrong.")
+    } finally {
+      setIsTyping(false)
+    }
   }
 
   return (
@@ -117,8 +117,12 @@ export default function ChatBot() {
                     : "bg-white border border-gray-200 rounded-bl-md"
                 }`}
               >
-                <p className="text-sm leading-relaxed">{message.content}</p>
-                <p className="text-xs mt-1 opacity-70">
+              <div className="prose prose-sm text-black max-w-none">
+                <ReactMarkdown>
+                  {message.content}
+                </ReactMarkdown>
+              </div>
+                <p className="text-xs mt-1 opacity-70 text-black">
                   {message.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                 </p>
               </div>
