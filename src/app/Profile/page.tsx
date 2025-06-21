@@ -1,3 +1,4 @@
+'use client'
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -6,7 +7,49 @@ import { User, Edit } from "lucide-react";
 import Sidebar from "@/components/ui/sidebar";
 import Header from "@/components/ui/header";
 
+import { useState } from "react";
+import { useEffect } from "react";
+import { supabase } from "@/lib/supabaseClient";
+
 export default function ProfilePage() {
+  const [profile, setProfile] = useState({
+    full_name: "",
+    username: "",
+    email: "",
+  });
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session?.access_token) return;
+
+      const res = await fetch("http://localhost:8000/getProfile", {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+
+      const user = await res.json();
+      console.log("Fetched user from backend:", user);
+
+      // Now call Supabase to get the full profile from `users` table
+      const { data: profileData } = await supabase
+        .from("users")
+        .select("full_name, username, email")
+        .eq("id", user.id)
+        .single();
+
+      if (profileData) {
+        setProfile(profileData);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
   return (
     <div className="min-h-screen bg-gray-200 flex">
       <Sidebar />
@@ -29,7 +72,7 @@ export default function ProfilePage() {
                   </Label>
                   <div className="relative">
                     <Input
-                      defaultValue="Christopher Zhu"
+                      defaultValue={profile.username}
                       className="bg-gray-300 border-0 text-gray-800 text-xl py-4 pr-14 rounded-full w-full"
                       readOnly
                     />
@@ -50,7 +93,7 @@ export default function ProfilePage() {
                   </Label>
                   <div className="relative">
                     <Input
-                      defaultValue="chris"
+                      value={profile.full_name}
                       className="bg-gray-300 border-0 text-gray-800 text-xl py-4 pr-14 rounded-full w-full"
                       readOnly
                     />
@@ -71,29 +114,7 @@ export default function ProfilePage() {
                   </Label>
                   <div className="relative">
                     <Input
-                      defaultValue="chrisshzhuu@gmail.com"
-                      className="bg-gray-300 border-0 text-gray-800 text-xl py-4 pr-14 rounded-full w-full"
-                      readOnly
-                    />
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 hover:text-gray-800 h-10 w-10"
-                    >
-                      <Edit className="w-5 h-5" />
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Password */}
-                <div className="space-y-3">
-                  <Label className="text-xl font-medium text-mcmaster-maroon">
-                    Password
-                  </Label>
-                  <div className="relative">
-                    <Input
-                      type="password"
-                      defaultValue="password123"
+                      value={profile.email}
                       className="bg-gray-300 border-0 text-gray-800 text-xl py-4 pr-14 rounded-full w-full"
                       readOnly
                     />
