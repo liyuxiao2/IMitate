@@ -1,4 +1,6 @@
 import sqlite3
+import os
+from typing import Dict, Any
 
 DATABASE_PATH = "src/api/patient_data.db"
  
@@ -14,6 +16,6 @@ def get_random_patient():
     conn.close()
     return patient  # returns a tuple or None
 
-# Initialize database and insert sample data
+# This allows running `python -m src.api.database` to reset the db
 if __name__ == "__main__":
-    print("Database initialized and seeded with sample patient data!") 
+    init_database() 

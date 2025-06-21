@@ -1,13 +1,11 @@
-"use client";
+import SocialScreen from "@/components/ui/social-screen"
+import Sidebar from "@/components/ui/sidebar"
 
-import type React from "react";
-
-
-export default function careerPage(){
-
-    return(
-        <div>
-            
-        </div>
-    )
+export default function Page() {
+  return (
+    <div className="flex h-screen bg-gray-200">
+      <Sidebar activePage="Social" />
+      <SocialScreen />
+    </div>
+  )
 }
