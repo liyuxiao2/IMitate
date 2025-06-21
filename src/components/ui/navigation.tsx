@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 
 interface NavigationProps {
   user?: {
@@ -13,11 +14,15 @@ interface NavigationProps {
 }
 
 export default function Navigation({user }: NavigationProps) {
-  const [activeLink, setActiveLink] = useState("Home")
   const [panelOpen, setPanelOpen] = useState(false)
 
-  const navItems = ["Home", "Career", "Friends", "Leaderboard"]
+  const navItems = ["Home", "Career", "Friends"]
 
+  const router = useRouter()
+
+  const handleRedirect = (name: string) => {
+    router.push("/" + name)
+  }
   return (
     <>
       {/* ✅ Profile Slide-Over Panel */}
@@ -61,10 +66,8 @@ export default function Navigation({user }: NavigationProps) {
               {navItems.map((item) => (
                 <li key={item}>
                   <button
-                    onClick={() => setActiveLink(item)}
-                    className={`text-white font-medium px-4 py-2 rounded transition-colors duration-300 text-sm sm:text-base ${
-                      activeLink === item ? "bg-mcmaster-light" : "hover:bg-mcmaster-light"
-                    }`}
+                    onClick={() => handleRedirect(item)}
+                    className="text-white font-medium px-4 py-2 rounded transition-colors duration-300 text-sm sm:text-base hover:bg-mcmaster-light"
                   >
                     {item}
                   </button>
