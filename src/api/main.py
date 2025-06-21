@@ -118,10 +118,9 @@ async def evaluate_performance(request: EvaluationRequest):
     and a defined rubric.
     """
     evaluation_rubric = """
-    Scoring System (Total 50 pts):
+    Scoring System (Total 45 pts):
     - Correct Diagnosis: 25 pts (Is the submitted diagnosis correct?)
     - OLDCARTS Mnemonic: 12 pts (1.5 pts for each component: Onset, Location, Duration, Character, Aggravating/Alleviating factors, Radiation, Temporal pattern, Severity)
-    - Differential Diagnoses: 5 pts (Did the student consider other plausible diagnoses?)
     - Associated Symptom Questions: 5 pts (Did they ask about relevant positive/negative symptoms?)
     - History Gathering: 4 pts (Did they ask about relevant medical, family, or social history?)
     - Logical, Focused Reasoning: 2 pts (Was the questioning logical and not random?)
@@ -130,6 +129,7 @@ async def evaluate_performance(request: EvaluationRequest):
 
     prompt = f"""
     You are an expert medical education evaluator. Your task is to analyze a simulated patient encounter and score the medical student's performance based on the provided data and a strict rubric.
+    Address the student as "you" in the first person.
 
     **1. Full Patient Case:**
     ```json
@@ -149,7 +149,13 @@ async def evaluate_performance(request: EvaluationRequest):
     {evaluation_rubric}
 
     **Instructions:**
-    Please evaluate the student's performance by analyzing the chat transcript. Provide a score for each category in the rubric and brief, constructive feedback explaining your reasoning for the score. Your response should be in a structured format.
+    Please evaluate the student's performance by analyzing the chat transcript. Provide a score for each category in the rubric and brief, constructive feedback explaining your reasoning for the score. Your response must be in a structured format.
+
+    **VERY IMPORTANT:** Your final response MUST begin with the total score as a single integer on the very first line, followed by a newline character. For example:
+    45
+    
+    **Correct Diagnosis: 25/25**
+    The student correctly identified the condition...
     """
 
     gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={GEMINI_API_KEY}"
@@ -163,8 +169,22 @@ async def evaluate_performance(request: EvaluationRequest):
         data = response.json()
 
     try:
-        evaluation_text = data["candidates"][0]["content"]["parts"][0]["text"]
-        return {"evaluation": evaluation_text}
+        full_response_text = data["candidates"][0]["content"]["parts"][0]["text"]
+        
+        # Split the response to separate the score from the detailed evaluation
+        response_parts = full_response_text.split('\n', 1)
+        score_str = response_parts[0].strip()
+        evaluation_text = response_parts[1].strip() if len(response_parts) > 1 else ""
+
+        # Convert score to integer, with a fallback
+        try:
+            score = int(score_str)
+        except (ValueError, IndexError):
+            print(f"⚠️ Could not parse score from response: '{score_str}'. Defaulting to 0.")
+            score = 0
+            evaluation_text = full_response_text # Keep the original text if score parsing fails
+
+        return {"score": score, "evaluation": evaluation_text}
     except (KeyError, IndexError) as e:
         print(f"⚠️ Failed to parse Gemini evaluation response: {e}")
         return {"error": "Failed to get a valid evaluation from the AI."}
