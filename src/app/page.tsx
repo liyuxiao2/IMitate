@@ -1,4 +1,4 @@
-import HomeClient from "@/components/ui/home_client";
+"use client";
 
 import type React from "react";
 
