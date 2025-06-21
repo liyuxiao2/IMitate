@@ -47,6 +47,7 @@ export default function ChatBot() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [patient, setPatient] = useState<Patient | null>(null);
   const [patientContext, setPatientContext] = useState<string>("");
+  const [showDiagnosis, setShowDiagnosis] = useState(false);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -61,8 +62,6 @@ export default function ChatBot() {
     };
     setMessages((prev) => [...prev, newMessage]);
   };
-
-  
 
   const fetchGeminiResponse = async (userInput: string): Promise<string> => {
     try {
@@ -81,8 +80,6 @@ export default function ChatBot() {
       return "Oops! Something went wrong.";
     }
   };
-
-
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -112,6 +109,7 @@ export default function ChatBot() {
   // Function to load patient data from backend
   const loadPatient = async () => {
     console.log("Load Patient button pressed – starting fetch...");
+    setShowDiagnosis(false); // Reset diagnosis visibility on new patient load
     try {
       console.log("Fetching patients from http://localhost:8000/patients …");
       const randomID = Math.floor(Math.random() * 10) + 1;
@@ -123,26 +121,26 @@ export default function ChatBot() {
       if (data) {
         setPatient(data.patient);
         // ✅ Construct context string (used for chat prompts)
-         console.log(patient);
+        console.log(patient);
 
-         if (data && Array.isArray(data.patient)) {
-            const patientObj = {
-              id: data.patient[0],
-              first_name: data.patient[1],
-              last_name: data.patient[2],
-              age: data.patient[3],
-              sex: data.patient[4],
-              pronouns: data.patient[5],
-              primary_complaint: data.patient[6],
-              personality: data.patient[7],
-              symptoms: data.patient[8],
-              medical_history: data.patient[9],
-              correct_diagnosis: data.patient[10],
-            };
+        if (data && Array.isArray(data.patient)) {
+          const patientObj = {
+            id: data.patient[0],
+            first_name: data.patient[1],
+            last_name: data.patient[2],
+            age: data.patient[3],
+            sex: data.patient[4],
+            pronouns: data.patient[5],
+            primary_complaint: data.patient[6],
+            personality: data.patient[7],
+            symptoms: data.patient[8],
+            medical_history: data.patient[9],
+            correct_diagnosis: data.patient[10],
+          };
 
-            setPatient(patientObj);
+          setPatient(patientObj);
 
-            const contextString = `
+          const contextString = `
               Patient Details:
               Name: ${patientObj.first_name} ${patientObj.last_name}
               Age: ${patientObj.age}
@@ -154,21 +152,21 @@ export default function ChatBot() {
               Medical History: ${patientObj.medical_history}
             `.trim();
 
-            setPatientContext(contextString);
-            setMessages([
-              {
-                id: Date.now().toString(),
-                type: "bot",
-                content: "Patient loaded. How can I assist you with this case?",
-                timestamp: new Date(),
-              },
-            ]);
-          }
+          setPatientContext(contextString);
+          setMessages([
+            {
+              id: Date.now().toString(),
+              type: "bot",
+              content: "The patient is ready to see you",
+              timestamp: new Date(),
+            },
+          ]);
+        }
         setMessages([
           {
             id: Date.now().toString(),
             type: "bot",
-            content: "Patient loaded. How can I assist you with this case?",
+            content: "The patient is ready to see you",
             timestamp: new Date(),
           },
         ]);
@@ -333,6 +331,27 @@ export default function ChatBot() {
                 <span className="font-medium">Chief Complaint:</span>{" "}
                 {patient.primary_complaint}
               </p>
+              <div className="mt-4 pt-4 border-t border-gray-200">
+                {showDiagnosis ? (
+                  <div className="space-y-2">
+                    <h3 className="font-semibold text-base">
+                      Correct Diagnosis:
+                    </h3>
+                    <p className="p-2 bg-green-100 text-green-800 rounded-md">
+                      {patient.correct_diagnosis}
+                    </p>
+                  </div>
+                ) : (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setShowDiagnosis(true)}
+                    className="w-full"
+                  >
+                    Reveal Diagnosis
+                  </Button>
+                )}
+              </div>
             </div>
           ) : (
             <p className="text-gray-500 text-sm">

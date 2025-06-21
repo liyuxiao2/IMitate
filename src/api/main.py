@@ -40,7 +40,7 @@ class PatientData(BaseModel):
     personality: str
     symptoms: str
     medical_history: str
-    correct_diagnosis: str
+
 
 @app.post("/chat")
 async def chat_endpoint(request: ChatRequest):
