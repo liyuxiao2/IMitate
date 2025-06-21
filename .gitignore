@@ -45,3 +45,6 @@ venv
 
 *.db
 *.pyc
+src/api/__pycache__/main.cpython-39.pyc
+src/api/__pycache__/database.cpython-39.pyc
+*.pyc
