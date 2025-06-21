@@ -48,6 +48,7 @@ export default function ChatBot() {
   const [patient, setPatient] = useState<Patient | null>(null);
   const [patientContext, setPatientContext] = useState<string>("");
   const [showDiagnosis, setShowDiagnosis] = useState(false);
+  const [doctorNotes, setDoctorNotes] = useState("");
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -109,7 +110,8 @@ export default function ChatBot() {
   // Function to load patient data from backend
   const loadPatient = async () => {
     console.log("Load Patient button pressed – starting fetch...");
-    setShowDiagnosis(false); // Reset diagnosis visibility on new patient load
+    setShowDiagnosis(false); // Reset diagnosis visibility
+    setDoctorNotes(""); // Clear notes for new patient
     try {
       console.log("Fetching patients from http://localhost:8000/patients …");
       const randomID = Math.floor(Math.random() * 10) + 1;
@@ -331,6 +333,15 @@ export default function ChatBot() {
                 <span className="font-medium">Chief Complaint:</span>{" "}
                 {patient.primary_complaint}
               </p>
+              <div className="mt-4 pt-4 border-t border-gray-200">
+                <h3 className="font-semibold text-base mb-2">Doctor's Notes</h3>
+                <textarea
+                  value={doctorNotes}
+                  onChange={(e) => setDoctorNotes(e.target.value)}
+                  placeholder="Type your notes here..."
+                  className="w-full h-120 p-2 border border-gray-300 rounded-md text-sm focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
               <div className="mt-4 pt-4 border-t border-gray-200">
                 {showDiagnosis ? (
                   <div className="space-y-2">
