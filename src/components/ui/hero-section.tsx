@@ -15,9 +15,6 @@ export default function HeroSection() {
       style={{ backgroundImage: "url('/IM_BG.jpg')" }}
     >
   
-      {/* Foreground content */}
-      <div className="relative z-10 space-y-8">
-  
         
   
       <button
@@ -26,7 +23,6 @@ export default function HeroSection() {
       >
         CHAT NOW
       </button>
-      </div>
     </main>
   )
 }
