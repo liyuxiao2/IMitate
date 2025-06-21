@@ -13,12 +13,7 @@ interface NavigationProps {
   }
 }
 
-<<<<<<< Updated upstream
 export default function Navigation({user}: NavigationProps) {
-=======
-export default function Navigation({ user }: NavigationProps) {
-  const [activeLink, setActiveLink] = useState("Home")
->>>>>>> Stashed changes
   const [panelOpen, setPanelOpen] = useState(false)
 
   const navItems = ["Home", "Career", "Friends"]
