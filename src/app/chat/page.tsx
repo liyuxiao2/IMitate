@@ -1,6 +1,7 @@
 "use client";
 
 import type React from "react";
+import Image from "next/image";
 
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,8 @@ import {
   Stethoscope,
   X,
   Book,
+  History,
+  Users,
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 
@@ -246,31 +249,11 @@ export default function ChatBot() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 p-4">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
-              <Bot className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <h1 className="text-xl font-semibold">IMitate</h1>
-              <p className="text-sm text-gray-600">
-                Medical Education Assistant
-              </p>
-            </div>
-          </div>
-          <Button variant="secondary" onClick={logFullDatabase}>
-            <Book className="mr-2 h-4 w-4" />
-            Log Entire DB
-          </Button>
-        </div>
-      </div>
-
+    <div className="flex h-screen bg-stone-200 font-sans">
+      {/* Modals and Overlays */}
       {isEvaluating && (
         <div className="fixed inset-0 bg-white bg-opacity-90 z-50 flex flex-col items-center justify-center">
-          <Bot className="w-16 h-16 text-blue-600 animate-pulse" />
+          <Bot className="w-16 h-16 text-[#7a003c] animate-pulse" />
           <p className="mt-4 text-lg font-semibold text-gray-700">
             Evaluating your performance...
           </p>
@@ -278,10 +261,12 @@ export default function ChatBot() {
       )}
 
       {isIntroModalOpen && patient && (
-        <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center">
-          <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-md text-center">
-            <h2 className="text-2xl font-bold mb-4">New Patient Case</h2>
-            <div className="text-left space-y-3 mb-6">
+        <div className="fixed inset-0 bg-stone-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-stone-100 p-8 rounded-xl shadow-xl w-full max-w-md text-center">
+            <h2 className="text-2xl font-bold mb-6 text-[#7a003c]">
+              New Patient Case
+            </h2>
+            <div className="text-left space-y-3 mb-8 text-gray-700">
               <p>
                 <span className="font-semibold">Name:</span>{" "}
                 {patient.first_name} {patient.last_name}
@@ -302,221 +287,33 @@ export default function ChatBot() {
                 {patient.primary_complaint}
               </p>
             </div>
-            <Button onClick={handleBeginCheckup} size="lg">
+            <Button
+              onClick={handleBeginCheckup}
+              size="lg"
+              className="w-full bg-[#7a003c] hover:bg-[#5d002e] text-white"
+            >
               Begin Checkup
             </Button>
           </div>
         </div>
       )}
 
-      {viewMode === "chat" ? (
-        <>
-          {/* Main Content: Chat + Patient Panel */}
-          <div className="flex flex-1 overflow-hidden max-w-6xl mx-auto w-full">
-            {/* Chat Section */}
-            <div className="flex flex-col flex-1">
-              {/* Messages */}
-              <ScrollArea className="flex-1 p-4">
-                <div className="space-y-4">
-                  {messages.map((message) => (
-                    <div
-                      key={message.id}
-                      className={`flex gap-3 ${
-                        message.type === "user"
-                          ? "justify-end"
-                          : "justify-start"
-                      }`}
-                    >
-                      {message.type === "bot" && (
-                        <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                          <Bot className="w-4 h-4 text-blue-600" />
-                        </div>
-                      )}
-                      <div
-                        className={`max-w-xs lg:max-w-2xl px-4 py-3 rounded-2xl ${
-                          message.type === "user"
-                            ? "bg-blue-600 text-white rounded-br-md"
-                            : "bg-white border border-gray-200 rounded-bl-md"
-                        }`}
-                      >
-                        <div className="prose prose-sm text-black max-w-none">
-                          <ReactMarkdown>{message.content}</ReactMarkdown>
-                        </div>
-                        <p className="text-xs mt-1 opacity-70 text-black">
-                          {message.timestamp.toLocaleTimeString("en-US", {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                            timeZone: "UTC",
-                          })}
-                        </p>
-                      </div>
-                      {message.type === "user" && (
-                        <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center flex-shrink-0">
-                          <User className="w-4 h-4 text-white" />
-                        </div>
-                      )}
-                    </div>
-                  ))}
-
-                  {/* Typing indicator */}
-                  {isTyping && (
-                    <div className="flex gap-3 justify-start">
-                      <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                        <Bot className="w-4 h-4 text-blue-600" />
-                      </div>
-                      <div className="bg-white border border-gray-200 rounded-2xl rounded-bl-md px-4 py-3">
-                        <div className="flex space-x-1">
-                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                          <div
-                            className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-                            style={{ animationDelay: "0.1s" }}
-                          ></div>
-                          <div
-                            className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-                            style={{ animationDelay: "0.2s" }}
-                          ></div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  <div ref={messagesEndRef} />
-                </div>
-              </ScrollArea>
-
-              {/* Input Area */}
-              <div className="bg-white border-t border-gray-200 p-4">
-                <form onSubmit={handleSubmit} className="max-w-4xl mx-auto">
-                  <div className="flex gap-3 items-end">
-                    <div className="flex-1 relative">
-                      <Input
-                        value={input}
-                        onChange={(e) => setInput(e.target.value)}
-                        placeholder="Ask me anything about medical education..."
-                        className="pr-12 py-3 text-sm resize-none border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                        disabled={isTyping}
-                      />
-                    </div>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="icon"
-                      className="h-10 w-10"
-                      onClick={() => setIsListening(!isListening)}
-                    >
-                      {isListening ? (
-                        <MicOff className="w-4 h-4" />
-                      ) : (
-                        <Mic className="w-4 h-4" />
-                      )}
-                    </Button>
-                    <Button
-                      type="submit"
-                      size="icon"
-                      className="h-10 w-10"
-                      disabled={!input.trim() || isTyping}
-                    >
-                      <Send className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </form>
-              </div>
-            </div>
-
-            {/* Patient Panel */}
-            <div className="w-96 border-l border-gray-200 bg-white p-4 overflow-y-auto">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold flex items-center gap-2">
-                  <Stethoscope className="w-5 h-5" /> Patient Info
-                </h2>
-                <Button size="sm" onClick={loadPatient}>
-                  Load Patient
-                </Button>
-              </div>
-
-              {patient ? (
-                <div className="space-y-2 text-sm">
-                  <p>
-                    <span className="font-medium">Name:</span>{" "}
-                    {patient.first_name} {patient.last_name}
-                  </p>
-                  <p>
-                    <span className="font-medium">Age:</span> {patient.age}
-                  </p>
-                  <p>
-                    <span className="font-medium">Sex:</span> {patient.sex} (
-                    {patient.pronouns})
-                  </p>
-                  <p>
-                    <span className="font-medium">Vitals:</span> H:{" "}
-                    {patient.height_cm}cm, W: {patient.weight_kg}kg, T:{" "}
-                    {patient.temp_c}°C, HR: {patient.heart_rate_bpm}bpm
-                  </p>
-                  <p>
-                    <span className="font-medium">Chief Complaint:</span>{" "}
-                    {patient.primary_complaint}
-                  </p>
-
-                  <div className="mt-4 pt-4 border-t border-gray-200">
-                    <h3 className="font-semibold text-base mb-2">
-                      Doctor's Notes
-                    </h3>
-                    <textarea
-                      value={doctorNotes}
-                      onChange={(e) => setDoctorNotes(e.target.value)}
-                      placeholder="Type your notes here..."
-                      className="w-full h-120 p-2 border border-gray-300 rounded-md text-sm focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                  <div className="mt-4 pt-4 border-t border-gray-200">
-                    <Button
-                      size="sm"
-                      onClick={() => setIsModalOpen(true)}
-                      className="w-full"
-                    >
-                      Edit Diagnosis
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                <p className="text-gray-500 text-sm">
-                  No patient loaded. Click "Load Patient" to fetch one.
-                </p>
-              )}
-            </div>
-          </div>
-        </>
-      ) : (
-        <div className="flex-1 p-8 max-w-4xl mx-auto w-full">
-          <h1 className="text-3xl font-bold mb-4">Evaluation Results</h1>
-          <div className="bg-white p-6 rounded-lg shadow-md prose max-w-none">
-            {evaluationResult ? (
-              <ReactMarkdown>{evaluationResult}</ReactMarkdown>
-            ) : (
-              <p>No evaluation available.</p>
-            )}
-          </div>
-          <div className="mt-8 text-center">
-            <Button onClick={handleStartNewCase}>Start New Case</Button>
-          </div>
-        </div>
-      )}
-
       {isModalOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-75 z-40 flex items-center justify-center"
+          className="fixed inset-0 bg-stone-900/70 backdrop-blur-sm z-40 flex items-center justify-center p-4"
           onClick={() => setIsModalOpen(false)}
         >
           <div
-            className="bg-white p-6 rounded-lg shadow-xl w-full max-w-lg z-50"
+            className="bg-stone-100 rounded-xl shadow-xl w-full max-w-lg z-50 overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex justify-between items-center bg-[#7a003c] p-4 text-white">
               <h2 className="text-xl font-bold">Edit Diagnosis & Aftercare</h2>
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => setIsModalOpen(false)}
+                className="text-white hover:bg-white/20"
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -567,7 +364,7 @@ export default function ChatBot() {
                 }
               }}
             >
-              <div className="space-y-4">
+              <div className="space-y-4 p-6">
                 <div>
                   <label
                     htmlFor="diagnosis"
@@ -580,7 +377,7 @@ export default function ChatBot() {
                     value={diagnosisInput}
                     onChange={(e) => setDiagnosisInput(e.target.value)}
                     rows={3}
-                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full p-2 bg-white border border-gray-300 rounded-md focus:ring-[#7a003c] focus:border-[#7a003c]"
                     placeholder="Enter the diagnosis..."
                   />
                 </div>
@@ -596,18 +393,230 @@ export default function ChatBot() {
                     value={aftercareInput}
                     onChange={(e) => setAftercareInput(e.target.value)}
                     rows={5}
-                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full p-2 bg-white border border-gray-300 rounded-md focus:ring-[#7a003c] focus:border-[#7a003c]"
                     placeholder="Provide aftercare instructions..."
                   />
                 </div>
               </div>
-              <div className="mt-6 flex justify-end">
-                <Button type="submit">Submit Diagnosis</Button>
+              <div className="flex justify-end bg-stone-200 p-4">
+                <Button
+                  type="submit"
+                  className="bg-[#7a003c] hover:bg-[#5d002e] text-white"
+                >
+                  Submit Diagnosis
+                </Button>
               </div>
             </form>
           </div>
         </div>
       )}
+
+      {/* Sidebar */}
+      <aside className="w-60 bg-[#5d002e] text-white flex flex-col">
+        <div className="p-5 border-b border-white/10">
+          <Image src="/IMlogo.png" alt="IMitate Logo" width={100} height={40} />
+        </div>
+        <nav className="flex-1 p-3 space-y-2">
+          <a
+            href="#"
+            className="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium bg-white/10"
+          >
+            <Stethoscope className="w-5 h-5" /> Practice
+          </a>
+          <a
+            href="#"
+            className="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium hover:bg-white/10"
+          >
+            <Users className="w-5 h-5" /> Social
+          </a>
+          <a
+            href="#"
+            className="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium hover:bg-white/10"
+          >
+            <History className="w-5 h-5" /> History
+          </a>
+        </nav>
+      </aside>
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col">
+        <header className="h-16 bg-white border-b border-gray-200 flex justify-end items-center px-6">
+          <div className="w-9 h-9 bg-gray-300 rounded-full flex items-center justify-center">
+            <User className="w-5 h-5 text-gray-600" />
+          </div>
+        </header>
+
+        <main className="flex-1 overflow-y-auto p-6">
+          {viewMode === "chat" ? (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Chat Column */}
+              <div className="lg:col-span-2 flex flex-col h-[calc(100vh-10rem)]">
+                <div className="bg-[#7a003c] text-white font-semibold py-2 px-4 rounded-t-xl">
+                  Chat
+                </div>
+                <ScrollArea className="flex-1 bg-stone-100 p-4">
+                  <div className="space-y-4">
+                    {messages.map((message) => (
+                      <div
+                        key={message.id}
+                        className={`flex gap-3 ${
+                          message.type === "user"
+                            ? "justify-end"
+                            : "justify-start"
+                        }`}
+                      >
+                        {message.type === "bot" && (
+                          <div className="w-8 h-8 rounded-full bg-stone-200 flex items-center justify-center flex-shrink-0">
+                            <Bot className="w-4 h-4 text-[#7a003c]" />
+                          </div>
+                        )}
+                        <div
+                          className={`max-w-xs lg:max-w-md px-4 py-3 rounded-2xl shadow ${
+                            message.type === "user"
+                              ? "bg-[#7a003c] text-white rounded-br-none"
+                              : "bg-white text-gray-800 rounded-bl-none"
+                          }`}
+                        >
+                          <div className="prose prose-sm max-w-none">
+                            <ReactMarkdown>{message.content}</ReactMarkdown>
+                          </div>
+                        </div>
+                        {message.type === "user" && (
+                          <div className="w-8 h-8 rounded-full bg-[#7a003c] flex items-center justify-center flex-shrink-0">
+                            <User className="w-4 h-4 text-white" />
+                          </div>
+                        )}
+                      </div>
+                    ))}
+
+                    {isTyping && (
+                      <div className="flex gap-3 justify-start">
+                        <div className="w-8 h-8 rounded-full bg-stone-200 flex items-center justify-center flex-shrink-0">
+                          <Bot className="w-4 h-4 text-[#7a003c]" />
+                        </div>
+                        <div className="bg-white rounded-2xl rounded-bl-none px-4 py-3 shadow">
+                          <div className="flex space-x-1">
+                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                            <div
+                              className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                              style={{ animationDelay: "0.1s" }}
+                            ></div>
+                            <div
+                              className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                              style={{ animationDelay: "0.2s" }}
+                            ></div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    <div ref={messagesEndRef} />
+                  </div>
+                </ScrollArea>
+                <div className="bg-stone-100 p-4 rounded-b-xl">
+                  <form onSubmit={handleSubmit} className="flex gap-3">
+                    <Input
+                      value={input}
+                      onChange={(e) => setInput(e.target.value)}
+                      placeholder="Start Typing..."
+                      className="flex-1 bg-white border-gray-300 rounded-full"
+                      disabled={isTyping}
+                    />
+                    <Button
+                      type="submit"
+                      size="icon"
+                      className="rounded-full bg-[#7a003c] hover:bg-[#5d002e] text-white"
+                      disabled={!input.trim() || isTyping}
+                    >
+                      <Send className="w-4 h-4" />
+                    </Button>
+                  </form>
+                </div>
+              </div>
+
+              {/* Patient Info & Notes Column */}
+              <div className="lg:col-span-1 space-y-6">
+                {/* Patient Info */}
+                <div className="bg-transparent rounded-xl">
+                  <div className="bg-[#7a003c] text-white font-semibold py-2 px-4 rounded-t-xl">
+                    Patient Information
+                  </div>
+                  <div className="bg-stone-100 p-4 rounded-b-xl">
+                    {patient ? (
+                      <div className="space-y-2 text-sm text-gray-700">
+                        <p>
+                          <span className="font-semibold">Name:</span>{" "}
+                          {patient.first_name} {patient.last_name}
+                        </p>
+                        <p>
+                          <span className="font-semibold">Age:</span>{" "}
+                          {patient.age}
+                        </p>
+                        <p>
+                          <span className="font-semibold">Sex:</span>{" "}
+                          {patient.sex} ({patient.pronouns})
+                        </p>
+                        <p>
+                          <span className="font-semibold">Vitals:</span> H:{" "}
+                          {patient.height_cm}cm, W: {patient.weight_kg}kg, T:{" "}
+                          {patient.temp_c}°C, HR: {patient.heart_rate_bpm}bpm
+                        </p>
+                        <p>
+                          <span className="font-semibold">
+                            Chief Complaint(s):
+                          </span>{" "}
+                          {patient.primary_complaint}
+                        </p>
+                      </div>
+                    ) : (
+                      <p className="text-gray-500 text-sm">
+                        No patient loaded. Click the button above to start.
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Notes */}
+                <div className="bg-transparent rounded-xl">
+                  <div className="bg-[#7a003c] text-white font-semibold py-2 px-4 rounded-t-xl">
+                    Notes
+                  </div>
+                  <div className="bg-stone-100 p-4 rounded-b-xl">
+                    <textarea
+                      value={doctorNotes}
+                      onChange={(e) => setDoctorNotes(e.target.value)}
+                      placeholder="Start Typing..."
+                      className="w-full h-32 p-2 bg-stone-100 border-none rounded-md text-sm focus:ring-0"
+                    />
+                  </div>
+                </div>
+
+                <Button
+                  onClick={() => setIsModalOpen(true)}
+                  className="w-full bg-[#7a003c] hover:bg-[#5d002e] text-white"
+                  disabled={!patient}
+                >
+                  Edit Diagnosis
+                </Button>
+              </div>
+            </div>
+          ) : (
+            // Results View
+            <div className="flex-1 p-8 max-w-4xl mx-auto w-full">
+              <h1 className="text-3xl font-bold mb-4">Evaluation Results</h1>
+              <div className="bg-white p-6 rounded-lg shadow-md prose max-w-none">
+                {evaluationResult ? (
+                  <ReactMarkdown>{evaluationResult}</ReactMarkdown>
+                ) : (
+                  <p>No evaluation available.</p>
+                )}
+              </div>
+              <div className="mt-8 text-center">
+                <Button onClick={handleStartNewCase}>Start New Case</Button>
+              </div>
+            </div>
+          )}
+        </main>
+      </div>
     </div>
   );
 }
