@@ -113,9 +113,7 @@ export default function ChatBot() {
   const loadPatient = async () => {
     console.log("Load Patient button pressed – starting fetch...");
     try {
-      console.log("Fetching patients from http://localhost:8000/patients …");
-      const randomID = Math.floor(Math.random() * 10) + 1;
-      const res = await fetch(`http://localhost:8000/patients/${randomID}`);
+      const res = await fetch(`http://localhost:8000/patients/random`);
       console.log("Fetch completed with status", res.status);
       const data = await res.json();
       console.log("Received data:", data);
