@@ -13,7 +13,7 @@ interface NavigationProps {
   }
 }
 
-export default function Navigation({user }: NavigationProps) {
+export default function Navigation({user}: NavigationProps) {
   const [panelOpen, setPanelOpen] = useState(false)
 
   const navItems = ["Home", "Career", "Friends"]
