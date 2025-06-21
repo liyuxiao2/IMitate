@@ -1,10 +1,11 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 import httpx
 import os
 from dotenv import load_dotenv
-from .database import get_random_patient
+from .data.database import get_random_patient
+from supabase.supabase_client import supabase
 
 load_dotenv()
 
