@@ -1,13 +1,5 @@
-"use client";
+import SocialScreen from "@/components/ui/social-screen"
 
-import type React from "react";
-
-
-export default function careerPage(){
-
-    return(
-        <div>
-            
-        </div>
-    )
+export default function Page() {
+  return <SocialScreen />
 }
