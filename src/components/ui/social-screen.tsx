@@ -28,7 +28,7 @@ export default function SocialScreen() {
   return (
     <div className="flex-1 flex flex-col">
       {/* Header */}
-      <div className="bg-mcmaster-maroon px-8 py-4 flex justify-end">
+      <div className="bg-top-bar px-8 py-4 flex justify-end">
         <Link href="/Profile" passHref>
           <Avatar className="w-10 h-10">
             <AvatarFallback className="bg-gray-300 text-gray-600">
