@@ -9,6 +9,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { User, Bot, Send, Mic, MicOff, Stethoscope, X } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import startSpeechRecognition from "./voice";
+import { loadPatient, Patient } from "./loadPatient";
+import CountdownTimer  from "@/components/ui/timer";
+
 
 interface Message {
   id: string;
@@ -17,20 +20,6 @@ interface Message {
   timestamp: Date;
 }
 
-// Add Patient interface
-interface Patient {
-  id: string;
-  first_name: string;
-  last_name: string;
-  age: number;
-  sex: string;
-  pronouns: string;
-  primary_complaint: string;
-  personality: string;
-  symptoms: string;
-  medical_history: string;
-  correct_diagnosis: string;
-}
 
 export default function ChatBot() {
   const [messages, setMessages] = useState<Message[]>([
@@ -54,15 +43,25 @@ export default function ChatBot() {
   const [viewMode, setViewMode] = useState<"chat" | "results">("chat");
   const [evaluationResult, setEvaluationResult] = useState<string | null>(null);
   const [isEvaluating, setIsEvaluating] = useState(false);
+  
 
   useEffect(() => {
-    loadPatient();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    loadPatient({
+      setPatient,
+      setPatientContext,
+      setDoctorNotes,
+      setIsModalOpen,
+      setDiagnosisInput,
+      setAftercareInput,
+      setMessages,
+    });
   }, []);
+
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
 
   const addMessage = (type: "user" | "bot", content: string) => {
     const newMessage: Message = {
@@ -73,6 +72,13 @@ export default function ChatBot() {
     };
     setMessages((prev) => [...prev, newMessage]);
   };
+
+  useEffect(() => {
+    if (evaluationResult === "❌ You ran out of time.") {
+      addMessage("bot", "⏰ Time's up! You can no longer speak or type. Please submit your diagnosis.");
+    }
+  }, [evaluationResult]);
+
 
   const fetchGeminiResponse = async (userInput: string): Promise<string> => {
     try {
@@ -152,80 +158,15 @@ export default function ChatBot() {
     setViewMode("chat");
     setEvaluationResult(null);
     // loadPatient will handle resetting all other relevant states
-    loadPatient();
-  };
-
-  // Function to load patient data from backend
-  const loadPatient = async () => {
-    console.log("Load Patient button pressed – starting fetch...");
-    setDoctorNotes(""); // Clear notes for new patient
-    setIsModalOpen(false); // Ensure modal is closed
-    setDiagnosisInput(""); // Clear previous diagnosis
-    setAftercareInput(""); // Clear previous aftercare
-    try {
-      const res = await fetch(`http://localhost:8000/patients/random`);
-      console.log("Fetch completed with status", res.status);
-      const data = await res.json();
-      console.log("Received data:", data);
-
-      if (data) {
-        setPatient(data.patient);
-        // ✅ Construct context string (used for chat prompts)
-        console.log(patient);
-
-        if (data && Array.isArray(data.patient)) {
-          const patientObj = {
-            id: data.patient[0],
-            first_name: data.patient[1],
-            last_name: data.patient[2],
-            age: data.patient[3],
-            sex: data.patient[4],
-            pronouns: data.patient[5],
-            primary_complaint: data.patient[6],
-            personality: data.patient[7],
-            symptoms: data.patient[8],
-            medical_history: data.patient[9],
-            correct_diagnosis: data.patient[10],
-          };
-
-          setPatient(patientObj);
-
-          const contextString = `
-              Patient Details:
-              Name: ${patientObj.first_name} ${patientObj.last_name}
-              Age: ${patientObj.age}
-              Sex: ${patientObj.sex}
-              Pronouns: ${patientObj.pronouns}
-              Primary Complaint: ${patientObj.primary_complaint}
-              Symptoms: ${patientObj.symptoms}
-              Personality: ${patientObj.personality}
-              Medical History: ${patientObj.medical_history}
-            `.trim();
-
-          setPatientContext(contextString);
-          setMessages([
-            {
-              id: Date.now().toString(),
-              type: "bot",
-              content: "Patient loaded. How can I assist you with this case?",
-              timestamp: new Date(),
-            },
-          ]);
-        }
-        setMessages([
-          {
-            id: Date.now().toString(),
-            type: "bot",
-            content: "Patient loaded. How can I assist you with this case?",
-            timestamp: new Date(),
-          },
-        ]);
-      } else {
-        console.warn("No patients found in response.");
-      }
-    } catch (err) {
-      console.error("Failed to load patient", err);
-    }
+    loadPatient({
+      setPatient,
+      setPatientContext,
+      setDoctorNotes,
+      setIsModalOpen,
+      setDiagnosisInput,
+      setAftercareInput,
+      setMessages,
+    });
   };
 
   return (
@@ -376,11 +317,16 @@ export default function ChatBot() {
                 <h2 className="text-lg font-semibold flex items-center gap-2">
                   <Stethoscope className="w-5 h-5" /> Patient Info
                 </h2>
-                <Button size="sm" onClick={loadPatient}>
-                  Load Patient
-                </Button>
-              </div>
+                <CountdownTimer
+                  seconds={600}
+                  onTimeout={() => {
+                    setIsTyping(true);       
+                    setIsListening(false);
+                    setEvaluationResult("❌ You ran out of time.")
+                  }}
+                />
 
+              </div>
               {patient ? (
                 <div className="space-y-2 text-sm">
                   <p>

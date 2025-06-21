@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import httpx
 import os
 from dotenv import load_dotenv
-from .database import get_all_patients, get_patient_by_id, get_random_patient
+from .database import get_random_patient
 
 load_dotenv()
 
@@ -103,12 +103,6 @@ async def chat_endpoint(request: ChatRequest):
 
     return {"reply": reply or "Sorry, I couldn't generate a response."}
 
-@app.get("/patients")
-async def get_patients():
-    """Get all patients from the database"""
-    patients = get_all_patients()
-    return {"patients": patients}
-
 @app.get("/patients/random")
 async def get_random_patient_endpoint():
     """Get a single random patient from the database"""
@@ -116,14 +110,6 @@ async def get_random_patient_endpoint():
     if patient:
         return {"patient": patient}
     return {"error": "No patients found in database"}
-
-@app.get("/patients/{patient_id}")
-async def get_patient(patient_id: str):
-    """Get a specific patient by ID"""
-    patient = get_patient_by_id(patient_id)
-    if patient:
-        return {"patient": patient}
-    return {"error": "Patient not found"}
 
 @app.post("/evaluate")
 async def evaluate_performance(request: EvaluationRequest):
@@ -182,4 +168,5 @@ async def evaluate_performance(request: EvaluationRequest):
     except (KeyError, IndexError) as e:
         print(f"⚠️ Failed to parse Gemini evaluation response: {e}")
         return {"error": "Failed to get a valid evaluation from the AI."}
+
 
