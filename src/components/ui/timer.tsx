@@ -58,9 +58,10 @@ export default function CountdownTimer({ seconds, onTimeout }: CountdownTimerPro
     return `${m}:${s}`;
   };
 
+
   return (
     <div
-      className={`text-center text-sm font-mono mb-4 ${
+      className={`bg-stone-100 w-full py-4 px-6 rounded-md text-center text-sm font-mono mb-4 shadow-sm" ${
         timeLeft === 0 ? "text-red-600" : "text-gray-600"
       }`}
     >

@@ -3,7 +3,7 @@ import Sidebar from "@/components/ui/sidebar"
 
 export default function Page() {
   return (
-    <div className="flex h-screen bg-gray-200">
+    <div className="flex bg-gray-200">
       <Sidebar activePage="Social" />
       <SocialScreen />
     </div>

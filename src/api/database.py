@@ -5,6 +5,30 @@ from typing import Dict, Any
 DATABASE_PATH = "src/api/patient_data.db"
  
 
+# Get the directory of the current script
+_dir = os.path.dirname(os.path.abspath(__file__))
+DATABASE_PATH = os.path.join(_dir, "patient_data.db")
+SQL_SCRIPT_PATH = os.path.join(_dir, "data.sql")
+
+
+def init_database():
+    """Initialize the database from the .sql script"""
+    # Remove the old DB file if it exists to ensure a fresh start
+    if os.path.exists(DATABASE_PATH):
+        os.remove(DATABASE_PATH)
+        
+    conn = sqlite3.connect(DATABASE_PATH)
+    cursor = conn.cursor()
+    
+    with open(SQL_SCRIPT_PATH, 'r') as sql_file:
+        sql_script = sql_file.read()
+        
+    cursor.executescript(sql_script)
+    
+    conn.commit()
+    conn.close()
+    print("Database initialized from data.sql script.")
+    
 def get_random_patient():
     """Get one random patient from the database"""
     conn = sqlite3.connect(DATABASE_PATH)
