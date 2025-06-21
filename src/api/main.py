@@ -4,10 +4,16 @@ from fastapi.middleware.cors import CORSMiddleware
 import httpx
 import os
 from dotenv import load_dotenv
+from .database import init_database, insert_patient, get_all_patients, get_patient_by_id
 
 load_dotenv()
 
 app = FastAPI()
+
+# Initialize database on startup
+@app.on_event("startup")
+async def startup_event():
+    init_database()
 
 # Allow frontend (adjust if needed)
 app.add_middleware(
@@ -23,16 +29,55 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 class ChatRequest(BaseModel):
     prompt: str
 
+class PatientData(BaseModel):
+    id: str
+    first_name: str
+    last_name: str
+    age: int
+    sex: str
+    pronouns: str
+    primary_complaint: str
+    personality: str
+    symptoms: str
+    medical_history: str
+    correct_diagnosis: str
+
 @app.post("/chat")
 async def chat_endpoint(request: ChatRequest):
     gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={GEMINI_API_KEY}"
 
+    print(f"\\n--- Raw prompt received from frontend: ---\\n{request.prompt}\\n-----------------------------------------\\n")
+
+    final_prompt_text = request.prompt
+    
+    # Check if this is a patient simulation chat
+    if "\n\nUser:" in request.prompt and "Patient Details:" in request.prompt:
+        try:
+            patient_info_block, user_query = request.prompt.split("\n\nUser:", 1)
+            user_query = user_query.strip()
+
+            final_prompt_text = (
+                "You are a patient simulator for a medical student. Your task is to act as the patient described below. "
+                "Respond to the medical student's questions from the patient's perspective, in the first person. "
+                "Use the provided personality and symptoms to guide your answers. Do not break character or reveal that you are an AI model.\\n\\n"
+                "--- PATIENT DETAILS ---\\n"
+                f"{patient_info_block}\\n"
+                "--- END DETAILS ---\\n\\n"
+                f'Medical Student\'s Question: "{user_query}"\\n\\n'
+                "Your response (as the patient):"
+            )
+        except ValueError:
+            # If split fails, just fall back to the original prompt
+            print(">>> PROMPT REFORMATTING FAILED: Separator not found. Using original prompt. <<<\n")
+            pass
+
+    print(f"\\n--- Final prompt sent to Gemini: ---\\n{final_prompt_text}\\n-----------------------------------\\n")
 
     headers = {"Content-Type": "application/json"}
     body = {
         "contents": [
             {
-                "parts": [{"text": request.prompt}]
+                "parts": [{"text": final_prompt_text}]
             }
         ]
     }
@@ -50,4 +95,24 @@ async def chat_endpoint(request: ChatRequest):
         print("⚠️ Failed to parse Gemini response:", e)
 
     return {"reply": reply or "Sorry, I couldn't generate a response."}
+
+@app.get("/patients")
+async def get_patients():
+    """Get all patients from the database"""
+    patients = get_all_patients()
+    return {"patients": patients}
+
+@app.get("/patients/{patient_id}")
+async def get_patient(patient_id: str):
+    """Get a specific patient by ID"""
+    patient = get_patient_by_id(patient_id)
+    if patient:
+        return {"patient": patient}
+    return {"error": "Patient not found"}
+
+@app.post("/patients")
+async def create_patient(patient: PatientData):
+    """Create a new patient"""
+    insert_patient(patient.dict())
+    return {"message": "Patient created successfully", "patient": patient}
 
