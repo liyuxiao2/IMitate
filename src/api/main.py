@@ -1,11 +1,11 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, HTTPException
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 import httpx
 import os
 from dotenv import load_dotenv
 from .data.database import get_random_patient
-from supabase.supabase_client import supabase
+from .supabase.supabase_client import supabase
 
 load_dotenv()
 
@@ -104,6 +104,7 @@ async def chat_endpoint(request: ChatRequest):
 
     return {"reply": reply or "Sorry, I couldn't generate a response."}
 
+
 @app.get("/patients/random")
 async def get_random_patient_endpoint():
     """Get a single random patient from the database"""
@@ -111,6 +112,7 @@ async def get_random_patient_endpoint():
     if patient:
         return {"patient": patient}
     return {"error": "No patients found in database"}
+
 
 @app.post("/evaluate")
 async def evaluate_performance(request: EvaluationRequest):
@@ -191,3 +193,17 @@ async def evaluate_performance(request: EvaluationRequest):
         return {"error": "Failed to get a valid evaluation from the AI."}
 
 
+@app.get("/getProfile")
+async def get_user(request: Request):
+    auth_header = request.headers.get("authorization")
+
+    if not auth_header or not auth_header.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Missing or invalid Authorization header")
+
+    token = auth_header.replace("Bearer ", "")
+    user_response = supabase.auth.get_user(token)
+
+    if user_response.user is None:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+    return user_response.user
