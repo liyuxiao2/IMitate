@@ -1,9 +1,10 @@
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { User, Edit } from "lucide-react"
-import Sidebar from "@/components/ui/sidebar"
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { User, Edit } from "lucide-react";
+import Sidebar from "@/components/ui/sidebar";
+import Header from "@/components/ui/header";
 
 export default function ProfilePage() {
   return (
@@ -11,23 +12,21 @@ export default function ProfilePage() {
       <Sidebar />
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
-        <div className="bg-top-bar px-8 py-4 flex justify-end">
-          <Avatar className="w-10 h-10">
-            <AvatarFallback className="bg-gray-300 text-gray-600">
-              <User className="w-5 h-5" />
-            </AvatarFallback>
-          </Avatar>
-        </div>
+        <Header />
         <div className="flex-1 p-12">
           <div className="max-w-5xl mx-auto">
-            <h1 className="text-5xl font-bold text-mcmaster-maroon mb-16">Profile</h1>
+            <h1 className="text-5xl font-bold text-mcmaster-maroon mb-16">
+              Profile
+            </h1>
 
             <div className="grid grid-cols-3 gap-x-24 items-start">
               {/* Form Section */}
               <div className="col-span-2 space-y-12">
                 {/* Display Name */}
                 <div className="space-y-3">
-                  <Label className="text-xl font-medium text-mcmaster-maroon">Display Name</Label>
+                  <Label className="text-xl font-medium text-mcmaster-maroon">
+                    Display Name
+                  </Label>
                   <div className="relative">
                     <Input
                       defaultValue="Christopher Zhu"
@@ -46,7 +45,9 @@ export default function ProfilePage() {
 
                 {/* Username */}
                 <div className="space-y-3">
-                  <Label className="text-xl font-medium text-mcmaster-maroon">Username</Label>
+                  <Label className="text-xl font-medium text-mcmaster-maroon">
+                    Username
+                  </Label>
                   <div className="relative">
                     <Input
                       defaultValue="chris"
@@ -65,7 +66,9 @@ export default function ProfilePage() {
 
                 {/* Email */}
                 <div className="space-y-3">
-                  <Label className="text-xl font-medium text-mcmaster-maroon">E-Mail</Label>
+                  <Label className="text-xl font-medium text-mcmaster-maroon">
+                    E-Mail
+                  </Label>
                   <div className="relative">
                     <Input
                       defaultValue="chrisshzhuu@gmail.com"
@@ -84,7 +87,9 @@ export default function ProfilePage() {
 
                 {/* Password */}
                 <div className="space-y-3">
-                  <Label className="text-xl font-medium text-mcmaster-maroon">Password</Label>
+                  <Label className="text-xl font-medium text-mcmaster-maroon">
+                    Password
+                  </Label>
                   <div className="relative">
                     <Input
                       type="password"
@@ -124,5 +129,5 @@ export default function ProfilePage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
