@@ -41,6 +41,9 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  --color-mcmaster-maroon: #7a003c;
+  --color-mcmaster-pink: linear-gradient(#e66465, #9198e5);
+  --color-mcmaster-light: #a64d79;
 }
 
 :root {
@@ -76,6 +79,8 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  --mcmaster-maroon: #7a003c;
+  --mcmaster-light: #a64d79;
 }
 
 .dark {
