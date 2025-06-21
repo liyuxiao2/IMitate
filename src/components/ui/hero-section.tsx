@@ -12,7 +12,7 @@ export default function HeroSection() {
   return (
     <main
       className="relative flex-1 flex flex-col justify-center items-center text-center px-4 py-8 bg-cover bg-center bg-no-repeat"
-      style={{ backgroundImage: "url('/BGIMGF.png')" }}
+      style={{ backgroundImage: "url('/IMBACK.png')" }}
     >
 
       <button

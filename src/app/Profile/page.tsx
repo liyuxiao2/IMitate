@@ -2,49 +2,16 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Dumbbell, Users, Clock, User, Edit } from "lucide-react"
-import Link from "next/link"
+import { User, Edit } from "lucide-react"
+import Sidebar from "@/components/ui/sidebar"
 
 export default function ProfilePage() {
   return (
     <div className="min-h-screen bg-gray-200 flex">
-      {/* Sidebar */}
-      <div className="w-64 bg-mcmaster-maroon text-white flex flex-col">
-        {/* Logo */}
-        <div className="p-6">
-          <Link href="/">
-            <img src="/IMlogo.png" alt="IMitate Logo" className="h-12 w-auto" />
-          </Link>
-        </div>
-
-        {/* Navigation */}
-        <nav className="flex-1 px-4">
-          <div className="space-y-2">
-            <Link href="/chat">
-              <div className="flex items-center gap-3 px-4 py-3 text-white/80 hover:text-white hover:bg-white/10 rounded-lg cursor-pointer">
-                <Dumbbell className="w-5 h-5" />
-                <span>Practice</span>
-              </div>
-            </Link>
-            <Link href="/Career">
-              <div className="flex items-center gap-3 px-4 py-3 text-white/80 hover:text-white hover:bg-white/10 rounded-lg cursor-pointer">
-                <Users className="w-5 h-5" />
-                <span>Social</span>
-              </div>
-            </Link>
-            <Link href="/History">
-              <div className="flex items-center gap-3 px-4 py-3 text-white/80 hover:text-white hover:bg-white/10 rounded-lg cursor-pointer">
-                <Clock className="w-5 h-5" />
-                <span>History</span>
-              </div>
-            </Link>
-          </div>
-        </nav>
-      </div>
-
+      <Sidebar />
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
-        <div className="bg-top-bar px-8 py-4 flex justify-end">
+        <div className="bg-mcmaster-maroon px-8 py-4 flex justify-end">
           <Avatar className="w-10 h-10">
             <AvatarFallback className="bg-gray-300 text-gray-600">
               <User className="w-5 h-5" />
