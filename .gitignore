@@ -50,8 +50,7 @@ __pycache__/
 
 # Database
 *.db
-*.sqlite
-*.sqlite3
-
-# Specific files from your request
-patient_data.db
+*.pyc
+src/api/__pycache__/main.cpython-39.pyc
+src/api/__pycache__/database.cpython-39.pyc
+*.pyc
