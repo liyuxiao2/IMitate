@@ -13,7 +13,7 @@ export default function ProfilePage() {
         {/* Logo */}
         <div className="p-6">
           <Link href="/">
-            <img src="/IMlogo.png" alt="IMitate Logo" className="h-8 w-auto" />
+            <img src="/IMlogo.png" alt="IMitate Logo" className="h-12 w-auto" />
           </Link>
         </div>
 
@@ -44,7 +44,7 @@ export default function ProfilePage() {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
-        <div className="bg-mcmaster-maroon px-8 py-4 flex justify-end">
+        <div className="bg-top-bar px-8 py-4 flex justify-end">
           <Avatar className="w-10 h-10">
             <AvatarFallback className="bg-gray-300 text-gray-600">
               <User className="w-5 h-5" />

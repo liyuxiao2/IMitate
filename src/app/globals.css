@@ -44,6 +44,7 @@
   --color-mcmaster-maroon: #7a003c;
   --color-mcmaster-pink: linear-gradient(#e66465, #9198e5);
   --color-mcmaster-light: #a64d79;
+  --color-top-bar: #5d002e;
 }
 
 :root {
@@ -81,6 +82,7 @@
   --sidebar-ring: oklch(0.708 0 0);
   --mcmaster-maroon: #7a003c;
   --mcmaster-light: #a64d79;
+  --top-bar: #5d002e;
 }
 
 .dark {
