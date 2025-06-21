@@ -17,10 +17,10 @@ import {
 import ReactMarkdown from "react-markdown";
 import startSpeechRecognition from "./voice";
 import Sidebar from "@/components/ui/sidebar";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { loadPatient, Patient } from "./loadPatient";
 import CountdownTimer from "@/components/ui/timer";
 
+import Header from "@/components/ui/header";
 interface Message {
   id: string;
   type: "user" | "bot";
@@ -352,13 +352,7 @@ export default function ChatBot() {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
-        <div className="bg-mcmaster-maroon px-8 py-4 flex justify-end">
-          <Avatar className="w-10 h-10">
-            <AvatarFallback className="bg-gray-300 text-gray-600">
-              <User className="w-5 h-5" />
-            </AvatarFallback>
-          </Avatar>
-        </div>
+        <Header />
 
         <main className="flex-1 overflow-y-auto p-6">
           {viewMode === "chat" ? (
