@@ -1,7 +1,6 @@
 "use client";
 
 import type React from "react";
-import Image from "next/image";
 
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
@@ -13,17 +12,14 @@ import {
   Send,
   Mic,
   MicOff,
-  Stethoscope,
   X,
-  Book,
-  History,
-  Users,
-  Link,
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import startSpeechRecognition from "./voice";
 import Sidebar from "@/components/ui/sidebar";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { loadPatient, Patient } from "./loadPatient";
+import CountdownTimer from "@/components/ui/timer";
+
 import Header from "@/components/ui/header";
 interface Message {
   id: string;
@@ -32,24 +28,7 @@ interface Message {
   timestamp: Date;
 }
 
-// Add Patient interface
-interface Patient {
-  id: string;
-  first_name: string;
-  last_name: string;
-  age: number;
-  sex: string;
-  pronouns: string;
-  height_cm: number | null;
-  weight_kg: number | null;
-  temp_c: number | null;
-  heart_rate_bpm: number | null;
-  primary_complaint: string;
-  personality: string;
-  symptoms: string;
-  medical_history: string;
-  correct_diagnosis: string;
-}
+
 
 export default function ChatBot() {
   const [messages, setMessages] = useState<Message[]>([
@@ -77,7 +56,16 @@ export default function ChatBot() {
   const [isIntroModalOpen, setIsIntroModalOpen] = useState(false);
 
   useEffect(() => {
-    loadPatient();
+    loadPatient({
+      setPatient,
+      setPatientContext,
+      setDoctorNotes,
+      setIsModalOpen,
+      setDiagnosisInput,
+      setAftercareInput,
+      setMessages,
+      setIsIntroModalOpen,
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -180,101 +168,24 @@ export default function ChatBot() {
     ]);
   };
 
-  const handleStartNewCase = () => {
+   const handleStartNewCase = () => {
     setViewMode("chat");
     setEvaluationResult(null);
     setEvaluationScore(null);
     // loadPatient will handle resetting all other relevant states
-    loadPatient();
-  };
+    loadPatient({
+      setPatient,
+      setPatientContext,
+      setDoctorNotes,
+      setIsModalOpen,
+      setDiagnosisInput,
+      setAftercareInput,
+      setMessages,
+      setIsIntroModalOpen, // ✅ now required
+    });
+  }
 
-  // Function to load patient data from backend
-  const loadPatient = async () => {
-    console.log("Load Patient button pressed – starting fetch...");
-    setDoctorNotes(""); // Clear notes for new patient
-    setIsModalOpen(false); // Ensure modal is closed
-    setDiagnosisInput(""); // Clear previous diagnosis
-    setAftercareInput(""); // Clear previous aftercare
-    try {
-      const res = await fetch(`http://localhost:8000/patients/random`);
-      console.log("Fetch completed with status", res.status);
-      const data = await res.json();
-      console.log("Received data:", data);
-
-      if (data) {
-        setPatient(data.patient);
-        // ✅ Construct context string (used for chat prompts)
-        console.log(patient);
-
-        if (data && Array.isArray(data.patient)) {
-          const patientObj: Patient = {
-            id: data.patient[0],
-            first_name: data.patient[1],
-            last_name: data.patient[2],
-            age: data.patient[3],
-            sex: data.patient[4],
-            pronouns: data.patient[5],
-            height_cm: data.patient[6],
-            weight_kg: data.patient[7],
-            temp_c: data.patient[8],
-            heart_rate_bpm: data.patient[9],
-            primary_complaint: data.patient[10],
-            personality: data.patient[11],
-            symptoms: data.patient[12],
-            medical_history: data.patient[13],
-            correct_diagnosis: data.patient[14],
-          };
-
-          setPatient(patientObj);
-
-          const contextString = `
-              Patient Details:
-              Name: ${patientObj.first_name} ${patientObj.last_name}
-              Age: ${patientObj.age}
-              Sex: ${patientObj.sex}
-              Pronouns: ${patientObj.pronouns}
-              Height: ${patientObj.height_cm} cm
-              Weight: ${patientObj.weight_kg} kg
-              Temperature: ${patientObj.temp_c} C
-              Heart Rate: ${patientObj.heart_rate_bpm} bpm
-              Primary Complaint: ${patientObj.primary_complaint}
-              Symptoms: ${patientObj.symptoms}
-              Personality: ${patientObj.personality}
-              Medical History: ${patientObj.medical_history}
-            `.trim();
-
-          setPatientContext(contextString);
-          setMessages([]); // Clear chat history
-          setIsIntroModalOpen(true); // Open the intro modal
-        }
-        setMessages([
-          {
-            id: Date.now().toString(),
-            type: "bot",
-            content: "Patient loaded. How can I assist you with this case?",
-            timestamp: new Date(),
-          },
-        ]);
-      } else {
-        console.warn("No patients found in response.");
-      }
-    } catch (err) {
-      console.error("Failed to load patient", err);
-    }
-  };
-
-  const logFullDatabase = async () => {
-    try {
-      console.log("Fetching full database from /patients...");
-      const res = await fetch("http://localhost:8000/patients");
-      const data = await res.json();
-      console.log("--- Full Database Content ---");
-      console.table(data.patients); // Using console.table for better readability
-      console.log("---------------------------");
-    } catch (error) {
-      console.error("Failed to fetch database:", error);
-    }
-  };
+  
 
   return (
     <div className="flex h-screen bg-stone-200 font-sans">
@@ -522,6 +433,20 @@ export default function ChatBot() {
                       disabled={isTyping}
                     />
                     <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      className="h-10 w-10"
+                      onClick={handleMicClick}
+                    >
+                      {isListening ? (
+                        <Mic className="w-4 h-4" />
+                      ) : (
+                        <MicOff className="w-4 h-4" />
+                      )}
+
+                    </Button>
+                    <Button
                       type="submit"
                       size="icon"
                       className="rounded-full bg-[#7a003c] hover:bg-[#5d002e] text-white"
@@ -535,6 +460,24 @@ export default function ChatBot() {
 
               {/* Patient Info & Notes Column */}
               <div className="lg:col-span-1 space-y-6">
+                {/* Timer */}
+                
+                <div className="bg-transparent rounded-xl">
+                  <div className="bg-[#7a003c] text-white font-semibold py-2 px-4 rounded-t-xl">
+                    Timer
+                  </div>
+
+                  <CountdownTimer
+                      seconds={600}
+                      onTimeout={() => {
+                        setIsTyping(true);       
+                        setIsListening(false);
+                        setEvaluationResult("❌ You ran out of time.")
+                      }}
+                      
+                    />
+                </div>
+
                 {/* Patient Info */}
                 <div className="bg-transparent rounded-xl">
                   <div className="bg-[#7a003c] text-white font-semibold py-2 px-4 rounded-t-xl">
