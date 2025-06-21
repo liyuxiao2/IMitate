@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import httpx
 import os
 from dotenv import load_dotenv
-from .database import init_database, insert_patient, get_all_patients, get_patient_by_id
+from .database import init_database, insert_patient, get_all_patients, get_patient_by_id, get_random_patient
 
 load_dotenv()
 
@@ -102,6 +102,14 @@ async def get_patients():
     """Get all patients from the database"""
     patients = get_all_patients()
     return {"patients": patients}
+
+@app.get("/patient/random")
+async def get_random_patient_endpoint():
+    """Get a single random patient from the database"""
+    patient = get_random_patient()
+    if patient:
+        return {"patient": patient}
+    return {"error": "No patients found in database"}
 
 @app.get("/patients/{patient_id}")
 async def get_patient(patient_id: str):

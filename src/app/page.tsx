@@ -109,17 +109,17 @@ export default function ChatBot() {
   const loadPatient = async () => {
     console.log("Load Patient button pressed – starting fetch...");
     try {
-      console.log("Fetching patients from http://localhost:8000/patients …");
-      const res = await fetch("http://localhost:8000/patients");
+      console.log(
+        "Fetching random patient from http://localhost:8000/patient/random …"
+      );
+      const res = await fetch("http://localhost:8000/patient/random");
       console.log("Fetch completed with status", res.status);
       const data = await res.json();
       console.log("Received data:", data);
 
-      if (data?.patients?.length > 0) {
-        console.log(
-          `Found ${data.patients.length} patient(s). Mapping first entry…`
-        );
-        const p = data.patients[0];
+      if (data?.patient) {
+        console.log("Found random patient. Mapping entry…");
+        const p = data.patient;
         // Backend returns a list (from SQLite row) -> map to object
         const patientObj: Patient = {
           id: p[0],
@@ -152,7 +152,7 @@ export default function ChatBot() {
           },
         ]);
       } else {
-        console.warn("No patients found in response.");
+        console.warn("No patient found in response.", data.error);
       }
     } catch (err) {
       console.error("Failed to load patient", err);
