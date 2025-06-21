@@ -1,31 +1,82 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Dumbbell, Users, History, User } from "lucide-react";
-import Link from "next/link";
+import { User } from "lucide-react";
 import Header from "./header";
+import { supabase } from "@/lib/supabaseClient";
 
 interface LeaderboardUser {
-  rank: number;
   username: string;
-  points: number;
-  avatar: string;
+  total_score: number;
 }
 
-const topUsers: LeaderboardUser[] = [
-  { rank: 1, username: "@chris", points: 240039, avatar: "/avatars/chris.png" },
-  { rank: 2, username: "@_liyxiao", points: 18394, avatar: "/avatars/li.png" },
-  { rank: 3, username: "@jeff", points: 12224, avatar: "/avatars/jeff.png" },
-];
-
-const leaderboardUsers: Omit<LeaderboardUser, "avatar">[] = [
-  { rank: 4, username: "@insertname", points: 11002 },
-  { rank: 5, username: "@insertname", points: 8192 },
-  { rank: 6, username: "@insertname", points: 7337 },
-  { rank: 7, username: "@insertname", points: 5323 },
-];
-
 export default function SocialScreen() {
+  const [users, setUsers] = useState<LeaderboardUser[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Function to fetch the latest leaderboard data
+    const fetchLeaderboard = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("users")
+          .select("username, total_score")
+          .order("total_score", { ascending: false });
+
+        if (error) {
+          throw error;
+        }
+        if (data) {
+          setUsers(data);
+        }
+      } catch (error) {
+        console.error("Error fetching leaderboard:", error);
+      }
+    };
+
+    // Perform the initial fetch and set loading state
+    const init = async () => {
+      setLoading(true);
+      await fetchLeaderboard();
+      setLoading(false);
+    };
+
+    init();
+
+    // Subscribe to realtime updates on the 'users' table
+    const channel = supabase
+      .channel("public:users")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "users" },
+        (payload) => {
+          console.log("Change received!", payload);
+          fetchLeaderboard(); // Refetch data when a change occurs
+        }
+      )
+      .subscribe();
+
+    // Cleanup subscription when the component unmounts
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  const top3 = users.slice(0, 3);
+  const rest = users.slice(3);
+
+  if (loading) {
+    return (
+      <div className="flex-1 flex flex-col">
+        <Header />
+        <div className="flex-1 flex items-center justify-center">
+          <p className="text-xl text-gray-600">Loading Leaderboard...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex-1 flex flex-col">
       {/* Header */}
@@ -34,81 +85,80 @@ export default function SocialScreen() {
       {/* Content Area */}
       <div className="flex-1 p-12">
         <div className="max-w-5xl mx-auto">
-          <h1 className="text-5xl font-bold text-mcmaster-maroon mb-2">
-            Social
-          </h1>
-          <p className="text-xl text-gray-600 mb-12">
-            Monthly Global Leaderboard
-          </p>
+          <h1 className="text-5xl font-bold text-[#5d002e] mb-2">Social</h1>
+          <p className="text-xl text-gray-600 mb-12">Global Leaderboard</p>
 
           {/* Top 3 Users */}
-          <div className="flex justify-center items-end gap-8 mb-16">
+          <div className="flex justify-center items-end gap-8 mb-16 h-80">
             {/* 2nd Place */}
-            <div className="text-center">
-              <Avatar className="w-32 h-32 border-8 border-gray-400">
-                <AvatarImage src={topUsers[1].avatar} />
-                <AvatarFallback>
-                  <User className="w-16 h-16" />
-                </AvatarFallback>
-              </Avatar>
-              <div className="mt-4 bg-mcmaster-maroon text-white rounded-full px-6 py-3">
-                <div className="flex items-center gap-4">
-                  <span className="text-3xl font-bold">2</span>
-                  <div>
-                    <div className="font-semibold text-lg">
-                      {topUsers[1].username}
-                    </div>
-                    <div className="text-white/80 italic">
-                      {topUsers[1].points.toLocaleString()} Points
+            {top3.length > 1 && (
+              <div className="text-center">
+                <Avatar className="w-32 h-32 border-8 border-gray-400">
+                  <AvatarFallback>
+                    <User className="w-16 h-16" />
+                  </AvatarFallback>
+                </Avatar>
+                <div className="mt-4 bg-[#7a003c] text-white rounded-full px-6 py-3">
+                  <div className="flex items-center gap-4">
+                    <span className="text-3xl font-bold">2</span>
+                    <div>
+                      <div className="font-semibold text-lg">
+                        {top3[1].username}
+                      </div>
+                      <div className="text-white/80 italic">
+                        {top3[1].total_score.toLocaleString()} Points
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
             {/* 1st Place */}
-            <div className="text-center">
-              <Avatar className="w-40 h-40 border-8 border-yellow-400">
-                <AvatarImage src={topUsers[0].avatar} />
-                <AvatarFallback>
-                  <User className="w-20 h-20" />
-                </AvatarFallback>
-              </Avatar>
-              <div className="mt-4 bg-mcmaster-maroon text-white rounded-full px-6 py-3">
-                <div className="flex items-center gap-4">
-                  <span className="text-4xl font-bold">1</span>
-                  <div>
-                    <div className="font-semibold text-xl">
-                      {topUsers[0].username}
-                    </div>
-                    <div className="text-white/80 italic">
-                      {topUsers[0].points.toLocaleString()} Points
+            {top3.length > 0 && (
+              <div className="text-center">
+                <Avatar className="w-40 h-40 border-8 border-yellow-400">
+                  <AvatarFallback>
+                    <User className="w-20 h-20" />
+                  </AvatarFallback>
+                </Avatar>
+                <div className="mt-4 bg-[#7a003c] text-white rounded-full px-6 py-3">
+                  <div className="flex items-center gap-4">
+                    <span className="text-4xl font-bold">1</span>
+                    <div>
+                      <div className="font-semibold text-xl">
+                        {top3[0].username}
+                      </div>
+                      <div className="text-white/80 italic">
+                        {top3[0].total_score.toLocaleString()} Points
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
             {/* 3rd Place */}
-            <div className="text-center">
-              <Avatar className="w-32 h-32 border-8 border-yellow-600">
-                <AvatarImage src={topUsers[2].avatar} />
-                <AvatarFallback>
-                  <User className="w-16 h-16" />
-                </AvatarFallback>
-              </Avatar>
-              <div className="mt-4 bg-mcmaster-maroon text-white rounded-full px-6 py-3">
-                <div className="flex items-center gap-4">
-                  <span className="text-3xl font-bold">3</span>
-                  <div>
-                    <div className="font-semibold text-lg">
-                      {topUsers[2].username}
-                    </div>
-                    <div className="text-white/80 italic">
-                      {topUsers[2].points.toLocaleString()} Points
+            {top3.length > 2 && (
+              <div className="text-center">
+                <Avatar className="w-32 h-32 border-8 border-yellow-600">
+                  <AvatarFallback>
+                    <User className="w-16 h-16" />
+                  </AvatarFallback>
+                </Avatar>
+                <div className="mt-4 bg-[#7a003c] text-white rounded-full px-6 py-3">
+                  <div className="flex items-center gap-4">
+                    <span className="text-3xl font-bold">3</span>
+                    <div>
+                      <div className="font-semibold text-lg">
+                        {top3[2].username}
+                      </div>
+                      <div className="text-white/80 italic">
+                        {top3[2].total_score.toLocaleString()} Points
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Leaderboard Table */}
@@ -121,9 +171,9 @@ export default function SocialScreen() {
             </div>
 
             {/* Leaderboard Rows */}
-            {leaderboardUsers.map((user) => (
+            {rest.map((user, index) => (
               <div
-                key={user.rank}
+                key={user.username}
                 className="bg-gray-300 rounded-full px-6 py-4 grid grid-cols-3 gap-4 items-center"
               >
                 <div className="text-gray-800 font-medium flex items-center gap-3">
@@ -131,10 +181,10 @@ export default function SocialScreen() {
                   {user.username}
                 </div>
                 <div className="text-center text-gray-700 font-semibold">
-                  {user.rank}
+                  {index + 4}
                 </div>
                 <div className="text-right text-gray-600 italic">
-                  {user.points.toLocaleString()}
+                  {user.total_score.toLocaleString()}
                 </div>
               </div>
             ))}
