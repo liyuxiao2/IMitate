@@ -42,6 +42,12 @@ class PatientData(BaseModel):
     medical_history: str
     correct_diagnosis: str
 
+class EvaluationRequest(BaseModel):
+    patientData: PatientData
+    chatHistory: str
+    submittedDiagnosis: str
+    submittedAftercare: str
+
 @app.post("/chat")
 async def chat_endpoint(request: ChatRequest):
     gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={GEMINI_API_KEY}"
@@ -118,4 +124,62 @@ async def get_patient(patient_id: str):
     if patient:
         return {"patient": patient}
     return {"error": "Patient not found"}
+
+@app.post("/evaluate")
+async def evaluate_performance(request: EvaluationRequest):
+    """
+    Evaluates student performance based on patient data, chat history,
+    and a defined rubric.
+    """
+    evaluation_rubric = """
+    Scoring System (Total 50 pts):
+    - Correct Diagnosis: 25 pts (Is the submitted diagnosis correct?)
+    - OLDCARTS Mnemonic: 12 pts (1.5 pts for each component: Onset, Location, Duration, Character, Aggravating/Alleviating factors, Radiation, Temporal pattern, Severity)
+    - Differential Diagnoses: 5 pts (Did the student consider other plausible diagnoses?)
+    - Associated Symptom Questions: 5 pts (Did they ask about relevant positive/negative symptoms?)
+    - History Gathering: 4 pts (Did they ask about relevant medical, family, or social history?)
+    - Logical, Focused Reasoning: 2 pts (Was the questioning logical and not random?)
+    - Timing Bonus: 2 pts (Deduct 0.5 pts per minute over 5 minutes, max deduction at 9 minutes)
+    """
+
+    prompt = f"""
+    You are an expert medical education evaluator. Your task is to analyze a simulated patient encounter and score the medical student's performance based on the provided data and a strict rubric.
+
+    **1. Full Patient Case:**
+    ```json
+    {request.patientData.model_dump_json(indent=2)}
+    ```
+
+    **2. Student's Submitted Diagnosis:**
+    - Diagnosis: {request.submittedDiagnosis}
+    - Aftercare Plan: {request.submittedAftercare}
+
+    **3. Full Chat Transcript:**
+    ```
+    {request.chatHistory}
+    ```
+
+    **4. Evaluation Rubric:**
+    {evaluation_rubric}
+
+    **Instructions:**
+    Please evaluate the student's performance by analyzing the chat transcript. Provide a score for each category in the rubric and brief, constructive feedback explaining your reasoning for the score. Your response should be in a structured format.
+    """
+
+    gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={GEMINI_API_KEY}"
+    headers = {"Content-Type": "application/json"}
+    body = {
+        "contents": [{"parts": [{"text": prompt}]}]
+    }
+
+    async with httpx.AsyncClient() as client:
+        response = await client.post(gemini_url, json=body, headers=headers)
+        data = response.json()
+
+    try:
+        evaluation_text = data["candidates"][0]["content"]["parts"][0]["text"]
+        return {"evaluation": evaluation_text}
+    except (KeyError, IndexError) as e:
+        print(f"⚠️ Failed to parse Gemini evaluation response: {e}")
+        return {"error": "Failed to get a valid evaluation from the AI."}
 
