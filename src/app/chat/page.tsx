@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { User, Bot, Send, Mic, MicOff, Stethoscope, X } from "lucide-react";
 import ReactMarkdown from "react-markdown";
+import startSpeechRecognition from "./voice";
 
 interface Message {
   id: string;
@@ -55,7 +56,6 @@ export default function ChatBot() {
   const [isEvaluating, setIsEvaluating] = useState(false);
 
   useEffect(() => {
-    // Automatically load a patient when the component mounts
     loadPatient();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -91,6 +91,31 @@ export default function ChatBot() {
       return "Oops! Something went wrong.";
     }
   };
+  
+  const handleMicClick = async () => {
+    if (isListening) return; // Already listening, block further clicks
+
+    setIsListening(true); // 🔴 Show mic is on immediately
+
+    try {
+      const transcript = await startSpeechRecognition(
+        () => console.log("Speech started"),
+        () => {
+          console.log("Speech ended");
+          setIsListening(false); // 🔵 Show mic is off when done
+        }
+      );
+
+
+      if (transcript.trim()) {
+        setInput(transcript); // 💬 Put transcript into input box
+        setIsListening(false);
+      }
+    } catch (error) {
+      setIsListening(false);
+    }
+  };
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -324,12 +349,12 @@ export default function ChatBot() {
                       variant="outline"
                       size="icon"
                       className="h-10 w-10"
-                      onClick={() => setIsListening(!isListening)}
+                      onClick={handleMicClick}
                     >
                       {isListening ? (
-                        <MicOff className="w-4 h-4" />
-                      ) : (
                         <Mic className="w-4 h-4" />
+                      ) : (
+                        <MicOff className="w-4 h-4" />
                       )}
                     </Button>
                     <Button
