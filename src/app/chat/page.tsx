@@ -18,11 +18,12 @@ import {
   Book,
   History,
   Users,
+  Link,
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import startSpeechRecognition from "./voice";
 import Sidebar from "@/components/ui/sidebar";
-
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 interface Message {
   id: string;
   type: "user" | "bot";
@@ -439,11 +440,13 @@ export default function ChatBot() {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
-        <header className="h-16 bg-white border-b border-gray-200 flex justify-end items-center px-6">
-          <div className="w-9 h-9 bg-gray-300 rounded-full flex items-center justify-center">
-            <User className="w-5 h-5 text-gray-600" />
-          </div>
-        </header>
+        <div className="bg-mcmaster-maroon px-8 py-4 flex justify-end">
+          <Avatar className="w-10 h-10">
+            <AvatarFallback className="bg-gray-300 text-gray-600">
+              <User className="w-5 h-5" />
+            </AvatarFallback>
+          </Avatar>
+        </div>
 
         <main className="flex-1 overflow-y-auto p-6">
           {viewMode === "chat" ? (
