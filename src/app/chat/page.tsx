@@ -62,6 +62,8 @@ export default function ChatBot() {
     setMessages((prev) => [...prev, newMessage]);
   };
 
+  
+
   const fetchGeminiResponse = async (userInput: string): Promise<string> => {
     try {
       const res = await fetch("http://localhost:8000/chat", {
@@ -79,6 +81,8 @@ export default function ChatBot() {
       return "Oops! Something went wrong.";
     }
   };
+
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -110,39 +114,56 @@ export default function ChatBot() {
     console.log("Load Patient button pressed – starting fetch...");
     try {
       console.log("Fetching patients from http://localhost:8000/patients …");
-      const res = await fetch("http://localhost:8000/patients");
+      const randomID = Math.floor(Math.random() * 10) + 1;
+      const res = await fetch(`http://localhost:8000/patients/${randomID}`);
       console.log("Fetch completed with status", res.status);
       const data = await res.json();
       console.log("Received data:", data);
 
-      if (data?.patients?.length > 0) {
-        console.log(
-          `Found ${data.patients.length} patient(s). Mapping first entry…`
-        );
-        const p = data.patients[0];
-        // Backend returns a list (from SQLite row) -> map to object
-        const patientObj: Patient = {
-          id: p[0],
-          first_name: p[1],
-          last_name: p[2],
-          age: p[3],
-          sex: p[4],
-          pronouns: p[5],
-          primary_complaint: p[6],
-          personality: p[7],
-          symptoms: p[8],
-          medical_history: p[9],
-          correct_diagnosis: p[10],
-        };
-        console.log("Mapped patient object:", patientObj);
-        setPatient(patientObj);
-        console.log("Patient state updated!");
+      if (data) {
+        setPatient(data.patient);
+        // ✅ Construct context string (used for chat prompts)
+         console.log(patient);
 
-        // Build context (exclude correct_diagnosis)
-        const context = `Patient Details:\nName: ${patientObj.first_name} ${patientObj.last_name}\nAge: ${patientObj.age}\nSex: ${patientObj.sex}\nPronouns: ${patientObj.pronouns}\nChief Complaint: ${patientObj.primary_complaint}\nPersonality: ${patientObj.personality}\nSymptoms: ${patientObj.symptoms}\nMedical History: ${patientObj.medical_history}`;
-        setPatientContext(context);
+         if (data && Array.isArray(data.patient)) {
+            const patientObj = {
+              id: data.patient[0],
+              first_name: data.patient[1],
+              last_name: data.patient[2],
+              age: data.patient[3],
+              sex: data.patient[4],
+              pronouns: data.patient[5],
+              primary_complaint: data.patient[6],
+              personality: data.patient[7],
+              symptoms: data.patient[8],
+              medical_history: data.patient[9],
+              correct_diagnosis: data.patient[10],
+            };
 
-        // Clear existing messages and start fresh conversation
+            setPatient(patientObj);
+
+            const contextString = `
+              Patient Details:
+              Name: ${patientObj.first_name} ${patientObj.last_name}
+              Age: ${patientObj.age}
+              Sex: ${patientObj.sex}
+              Pronouns: ${patientObj.pronouns}
+              Primary Complaint: ${patientObj.primary_complaint}
+              Symptoms: ${patientObj.symptoms}
+              Personality: ${patientObj.personality}
+              Medical History: ${patientObj.medical_history}
+            `.trim();
+
+            setPatientContext(contextString);
+            setMessages([
+              {
+                id: Date.now().toString(),
+                type: "bot",
+                content: "Patient loaded. How can I assist you with this case?",
+                timestamp: new Date(),
+              },
+            ]);
+          }
         setMessages([
           {
             id: Date.now().toString(),

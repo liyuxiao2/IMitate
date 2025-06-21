@@ -4,16 +4,16 @@ from fastapi.middleware.cors import CORSMiddleware
 import httpx
 import os
 from dotenv import load_dotenv
-from .database import init_database, insert_patient, get_all_patients, get_patient_by_id
+from .database import get_patient_by_id, get_all_patients
 
 load_dotenv()
 
 app = FastAPI()
 
-# Initialize database on startup
-@app.on_event("startup")
-async def startup_event():
-    init_database()
+# # Initialize database on startup
+# @app.on_event("startup")
+# async def startup_event():
+#     init_database()
 
 # Allow frontend (adjust if needed)
 app.add_middleware(
@@ -110,10 +110,4 @@ async def get_patient(patient_id: str):
     if patient:
         return {"patient": patient}
     return {"error": "Patient not found"}
-
-@app.post("/patients")
-async def create_patient(patient: PatientData):
-    """Create a new patient"""
-    insert_patient(patient.dict())
-    return {"message": "Patient created successfully", "patient": patient}
 
