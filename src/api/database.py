@@ -2,51 +2,8 @@ import sqlite3
 import os
 from typing import Dict, Any
 
-# Get the directory of the current script
-_dir = os.path.dirname(os.path.abspath(__file__))
-DATABASE_PATH = os.path.join(_dir, "patient_data.db")
-SQL_SCRIPT_PATH = os.path.join(_dir, "data.sql")
-
-
-def init_database():
-    """Initialize the database from the .sql script"""
-    # Remove the old DB file if it exists to ensure a fresh start
-    if os.path.exists(DATABASE_PATH):
-        os.remove(DATABASE_PATH)
-        
-    conn = sqlite3.connect(DATABASE_PATH)
-    cursor = conn.cursor()
-    
-    with open(SQL_SCRIPT_PATH, 'r') as sql_file:
-        sql_script = sql_file.read()
-        
-    cursor.executescript(sql_script)
-    
-    conn.commit()
-    conn.close()
-    print("Database initialized from data.sql script.")
-
-def get_all_patients():
-    """Get all patients from the database"""
-    conn = sqlite3.connect(DATABASE_PATH)
-    cursor = conn.cursor()
-    
-    cursor.execute('SELECT * FROM patient_data')
-    patients = cursor.fetchall()
-    
-    conn.close()
-    return patients
-
-def get_patient_by_id(patient_id: str):
-    """Get a specific patient by ID"""
-    conn = sqlite3.connect(DATABASE_PATH)
-    cursor = conn.cursor()
-    
-    cursor.execute('SELECT * FROM patient_data WHERE id = ?', (patient_id,))
-    patient = cursor.fetchone()
-    
-    conn.close()
-    return patient
+DATABASE_PATH = "src/api/patient_data.db"
+ 
 
 def get_random_patient():
     """Get one random patient from the database"""
