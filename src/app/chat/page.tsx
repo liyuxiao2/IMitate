@@ -72,6 +72,7 @@ export default function ChatBot() {
   const [aftercareInput, setAftercareInput] = useState("");
   const [viewMode, setViewMode] = useState<"chat" | "results">("chat");
   const [evaluationResult, setEvaluationResult] = useState<string | null>(null);
+  const [evaluationScore, setEvaluationScore] = useState<number | null>(null);
   const [isEvaluating, setIsEvaluating] = useState(false);
   const [isIntroModalOpen, setIsIntroModalOpen] = useState(false);
 
@@ -182,6 +183,7 @@ export default function ChatBot() {
   const handleStartNewCase = () => {
     setViewMode("chat");
     setEvaluationResult(null);
+    setEvaluationScore(null);
     // loadPatient will handle resetting all other relevant states
     loadPatient();
   };
@@ -381,6 +383,7 @@ export default function ChatBot() {
 
                   const result = await res.json();
                   setEvaluationResult(result.evaluation);
+                  setEvaluationScore(result.score);
                   setViewMode("results");
                 } catch (error) {
                   console.error("Failed to submit evaluation:", error);
@@ -599,7 +602,18 @@ export default function ChatBot() {
           ) : (
             // Results View
             <div className="flex-1 p-8 max-w-4xl mx-auto w-full">
-              <h1 className="text-3xl font-bold mb-4">Evaluation Results</h1>
+              <h1 className="text-3xl font-bold mb-2 text-center">
+                Evaluation Results
+              </h1>
+              {evaluationScore !== null && (
+                <div className="text-center mb-6">
+                  <p className="text-lg text-gray-600">Your Score</p>
+                  <p className="text-7xl font-bold text-[#7a003c]">
+                    {evaluationScore}
+                    <span className="text-4xl text-gray-500">/45</span>
+                  </p>
+                </div>
+              )}
               <div className="bg-white p-6 rounded-lg shadow-md prose max-w-none">
                 {evaluationResult ? (
                   <ReactMarkdown>{evaluationResult}</ReactMarkdown>
@@ -608,7 +622,12 @@ export default function ChatBot() {
                 )}
               </div>
               <div className="mt-8 text-center">
-                <Button onClick={handleStartNewCase}>Start New Case</Button>
+                <Button
+                  onClick={handleStartNewCase}
+                  className="bg-[#7a003c] hover:bg-[#5d002e] text-white"
+                >
+                  Start New Case
+                </Button>
               </div>
             </div>
           )}
