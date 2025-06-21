@@ -19,7 +19,7 @@ export default function Sidebar({ activePage }: SidebarProps) {
       {/* Logo */}
       <div className="p-6">
         <Link href="/">
-          <img src="/IMlogo.png" alt="IMitate Logo" className="h-8 w-auto" />
+          <img src="/IMlogo.png" alt="IMitate Logo" className="h-12 w-auto" />
         </Link>
       </div>
 
