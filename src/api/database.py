@@ -35,7 +35,7 @@ def get_random_patient():
     patient = cursor.fetchone()
     
     conn.close()
-    return patient
+    return patient  # returns a tuple or None
 
 # Initialize database and insert sample data
 if __name__ == "__main__":
