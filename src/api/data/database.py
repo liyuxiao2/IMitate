@@ -1,8 +1,7 @@
 import sqlite3
 import os
-from typing import Dict, Any
 
-DATABASE_PATH = "src/api/patient_data.db"
+DATABASE_PATH = "src/api/data/patient_data.db"
  
 
 # Get the directory of the current script
