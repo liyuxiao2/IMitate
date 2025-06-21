@@ -312,18 +312,6 @@ export default function ChatBot() {
                 <span className="font-medium">Chief Complaint:</span>{" "}
                 {patient.primary_complaint}
               </p>
-              <p>
-                <span className="font-medium">Personality:</span>{" "}
-                {patient.personality}
-              </p>
-              <p>
-                <span className="font-medium">Symptoms:</span>{" "}
-                {patient.symptoms}
-              </p>
-              <p>
-                <span className="font-medium">Medical History:</span>{" "}
-                {patient.medical_history}
-              </p>
             </div>
           ) : (
             <p className="text-gray-500 text-sm">

@@ -59,6 +59,7 @@ async def chat_endpoint(request: ChatRequest):
             final_prompt_text = (
                 "You are a patient simulator for a medical student. Your task is to act as the patient described below. "
                 "Respond to the medical student's questions from the patient's perspective, in the first person. "
+                "Talk as if you are the patient, do not use quotation marks, you may use *asterisks* to illustrate actions (eg. *clutches stomach*), if you do, put it on a new line."
                 "Use the provided personality and symptoms to guide your answers. Do not break character or reveal that you are an AI model.\\n\\n"
                 "--- PATIENT DETAILS ---\\n"
                 f"{patient_info_block}\\n"
