@@ -6,7 +6,16 @@ import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { User, Bot, Send, Mic, MicOff, Stethoscope, X } from "lucide-react";
+import {
+  User,
+  Bot,
+  Send,
+  Mic,
+  MicOff,
+  Stethoscope,
+  X,
+  Book,
+} from "lucide-react";
 import ReactMarkdown from "react-markdown";
 
 interface Message {
@@ -24,6 +33,10 @@ interface Patient {
   age: number;
   sex: string;
   pronouns: string;
+  height_cm: number | null;
+  weight_kg: number | null;
+  temp_c: number | null;
+  heart_rate_bpm: number | null;
   primary_complaint: string;
   personality: string;
   symptoms: string;
@@ -53,6 +66,7 @@ export default function ChatBot() {
   const [viewMode, setViewMode] = useState<"chat" | "results">("chat");
   const [evaluationResult, setEvaluationResult] = useState<string | null>(null);
   const [isEvaluating, setIsEvaluating] = useState(false);
+  const [isIntroModalOpen, setIsIntroModalOpen] = useState(false);
 
   useEffect(() => {
     // Automatically load a patient when the component mounts
@@ -123,6 +137,19 @@ export default function ChatBot() {
       .join("\n");
   };
 
+  const handleBeginCheckup = () => {
+    setIsIntroModalOpen(false);
+    setMessages([
+      {
+        id: Date.now().toString(),
+        type: "bot",
+        content:
+          "The patient is ready for you. You can start by asking a question.",
+        timestamp: new Date(),
+      },
+    ]);
+  };
+
   const handleStartNewCase = () => {
     setViewMode("chat");
     setEvaluationResult(null);
@@ -149,18 +176,22 @@ export default function ChatBot() {
         console.log(patient);
 
         if (data && Array.isArray(data.patient)) {
-          const patientObj = {
+          const patientObj: Patient = {
             id: data.patient[0],
             first_name: data.patient[1],
             last_name: data.patient[2],
             age: data.patient[3],
             sex: data.patient[4],
             pronouns: data.patient[5],
-            primary_complaint: data.patient[6],
-            personality: data.patient[7],
-            symptoms: data.patient[8],
-            medical_history: data.patient[9],
-            correct_diagnosis: data.patient[10],
+            height_cm: data.patient[6],
+            weight_kg: data.patient[7],
+            temp_c: data.patient[8],
+            heart_rate_bpm: data.patient[9],
+            primary_complaint: data.patient[10],
+            personality: data.patient[11],
+            symptoms: data.patient[12],
+            medical_history: data.patient[13],
+            correct_diagnosis: data.patient[14],
           };
 
           setPatient(patientObj);
@@ -171,6 +202,10 @@ export default function ChatBot() {
               Age: ${patientObj.age}
               Sex: ${patientObj.sex}
               Pronouns: ${patientObj.pronouns}
+              Height: ${patientObj.height_cm} cm
+              Weight: ${patientObj.weight_kg} kg
+              Temperature: ${patientObj.temp_c} C
+              Heart Rate: ${patientObj.heart_rate_bpm} bpm
               Primary Complaint: ${patientObj.primary_complaint}
               Symptoms: ${patientObj.symptoms}
               Personality: ${patientObj.personality}
@@ -178,14 +213,8 @@ export default function ChatBot() {
             `.trim();
 
           setPatientContext(contextString);
-          setMessages([
-            {
-              id: Date.now().toString(),
-              type: "bot",
-              content: "Patient loaded. How can I assist you with this case?",
-              timestamp: new Date(),
-            },
-          ]);
+          setMessages([]); // Clear chat history
+          setIsIntroModalOpen(true); // Open the intro modal
         }
         setMessages([
           {
@@ -200,6 +229,19 @@ export default function ChatBot() {
       }
     } catch (err) {
       console.error("Failed to load patient", err);
+    }
+  };
+
+  const logFullDatabase = async () => {
+    try {
+      console.log("Fetching full database from /patients...");
+      const res = await fetch("http://localhost:8000/patients");
+      const data = await res.json();
+      console.log("--- Full Database Content ---");
+      console.table(data.patients); // Using console.table for better readability
+      console.log("---------------------------");
+    } catch (error) {
+      console.error("Failed to fetch database:", error);
     }
   };
 
@@ -219,6 +261,10 @@ export default function ChatBot() {
               </p>
             </div>
           </div>
+          <Button variant="secondary" onClick={logFullDatabase}>
+            <Book className="mr-2 h-4 w-4" />
+            Log Entire DB
+          </Button>
         </div>
       </div>
 
@@ -228,6 +274,38 @@ export default function ChatBot() {
           <p className="mt-4 text-lg font-semibold text-gray-700">
             Evaluating your performance...
           </p>
+        </div>
+      )}
+
+      {isIntroModalOpen && patient && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center">
+          <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-md text-center">
+            <h2 className="text-2xl font-bold mb-4">New Patient Case</h2>
+            <div className="text-left space-y-3 mb-6">
+              <p>
+                <span className="font-semibold">Name:</span>{" "}
+                {patient.first_name} {patient.last_name}
+              </p>
+              <p>
+                <span className="font-semibold">Age:</span> {patient.age}
+              </p>
+              <p>
+                <span className="font-semibold">Sex:</span> {patient.sex}
+              </p>
+              <p>
+                <span className="font-semibold">Vitals:</span> H:{" "}
+                {patient.height_cm}cm, W: {patient.weight_kg}kg, T:{" "}
+                {patient.temp_c}°C, HR: {patient.heart_rate_bpm}bpm
+              </p>
+              <p>
+                <span className="font-semibold">Chief Complaint:</span>{" "}
+                {patient.primary_complaint}
+              </p>
+            </div>
+            <Button onClick={handleBeginCheckup} size="lg">
+              Begin Checkup
+            </Button>
+          </div>
         </div>
       )}
 
@@ -370,18 +448,15 @@ export default function ChatBot() {
                     {patient.pronouns})
                   </p>
                   <p>
+                    <span className="font-medium">Vitals:</span> H:{" "}
+                    {patient.height_cm}cm, W: {patient.weight_kg}kg, T:{" "}
+                    {patient.temp_c}°C, HR: {patient.heart_rate_bpm}bpm
+                  </p>
+                  <p>
                     <span className="font-medium">Chief Complaint:</span>{" "}
                     {patient.primary_complaint}
                   </p>
-                  <div className="mt-4 pt-4 border-t border-gray-200">
-                    <Button
-                      size="sm"
-                      onClick={() => setIsModalOpen(true)}
-                      className="w-full"
-                    >
-                      Edit Diagnosis
-                    </Button>
-                  </div>
+
                   <div className="mt-4 pt-4 border-t border-gray-200">
                     <h3 className="font-semibold text-base mb-2">
                       Doctor's Notes
@@ -390,8 +465,17 @@ export default function ChatBot() {
                       value={doctorNotes}
                       onChange={(e) => setDoctorNotes(e.target.value)}
                       placeholder="Type your notes here..."
-                      className="w-full h-32 p-2 border border-gray-300 rounded-md text-sm focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full h-120 p-2 border border-gray-300 rounded-md text-sm focus:ring-blue-500 focus:border-blue-500"
                     />
+                  </div>
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <Button
+                      size="sm"
+                      onClick={() => setIsModalOpen(true)}
+                      className="w-full"
+                    >
+                      Edit Diagnosis
+                    </Button>
                   </div>
                 </div>
               ) : (
