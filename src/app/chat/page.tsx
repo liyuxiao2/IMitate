@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import startSpeechRecognition from "./voice";
+import Sidebar from "@/components/ui/sidebar";
 
 interface Message {
   id: string;
@@ -108,7 +109,7 @@ export default function ChatBot() {
       return "Oops! Something went wrong.";
     }
   };
-  
+
   const handleMicClick = async () => {
     if (isListening) return; // Already listening, block further clicks
 
@@ -123,7 +124,6 @@ export default function ChatBot() {
         }
       );
 
-
       if (transcript.trim()) {
         setInput(transcript); // 💬 Put transcript into input box
         setIsListening(false);
@@ -132,7 +132,6 @@ export default function ChatBot() {
       setIsListening(false);
     }
   };
-
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -436,32 +435,7 @@ export default function ChatBot() {
         </div>
       )}
 
-      {/* Sidebar */}
-      <aside className="w-60 bg-[#5d002e] text-white flex flex-col">
-        <div className="p-5 border-b border-white/10">
-          <Image src="/IMlogo.png" alt="IMitate Logo" width={100} height={40} />
-        </div>
-        <nav className="flex-1 p-3 space-y-2">
-          <a
-            href="#"
-            className="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium bg-white/10"
-          >
-            <Stethoscope className="w-5 h-5" /> Practice
-          </a>
-          <a
-            href="#"
-            className="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium hover:bg-white/10"
-          >
-            <Users className="w-5 h-5" /> Social
-          </a>
-          <a
-            href="#"
-            className="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium hover:bg-white/10"
-          >
-            <History className="w-5 h-5" /> History
-          </a>
-        </nav>
-      </aside>
+      <Sidebar />
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
