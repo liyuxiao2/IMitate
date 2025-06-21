@@ -23,21 +23,23 @@ export default function SocialScreen() {
   return (
     <div className="flex h-screen bg-gray-200">
       {/* Sidebar */}
-      <div className="w-64 bg-[#7d2d5c] text-white flex flex-col">
+      <div className="w-64 bg-[#7A003C] text-white flex flex-col">
         {/* Logo */}
         <div className="p-6">
-            <Link href="/">
-                <img src="/IMlogo.png" alt="IMitate Logo" className="h-8 w-auto" />
-            </Link>
+          <Link href="/">
+            <img src="/IMlogo.png" alt="IMitate Logo" className="h-8 w-auto" />
+          </Link>
         </div>
 
         {/* Navigation */}
         <nav className="flex-1 px-4">
           <div className="space-y-2">
-            <div className="flex items-center gap-3 px-4 py-3 text-white/70 hover:text-white hover:bg-white/10 rounded-lg cursor-pointer">
-              <Dumbbell className="w-5 h-5" />
-              <span>Practice</span>
-            </div>
+            <Link href="/chat">
+              <div className="flex items-center gap-3 px-4 py-3 text-white/70 hover:text-white hover:bg-white/10 rounded-lg cursor-pointer">
+                <Dumbbell className="w-5 h-5" />
+                <span>Practice</span>
+              </div>
+            </Link>
             <div className="flex items-center gap-3 px-4 py-3 bg-white/20 text-white rounded-lg">
               <Users className="w-5 h-5" />
               <span>Social</span>
@@ -53,7 +55,7 @@ export default function SocialScreen() {
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
         {/* Header */}
-        <div className="bg-[#7d2d5c] px-8 py-4 flex justify-end">
+        <div className="bg-[#7A003C] px-8 py-4 flex justify-end">
           <Avatar className="w-10 h-10">
             <AvatarImage src="/placeholder-user.jpg" />
             <AvatarFallback className="bg-gray-300 text-gray-600">
@@ -67,14 +69,14 @@ export default function SocialScreen() {
           {/* Title and Search */}
           <div className="flex justify-between items-start mb-8">
             <div>
-              <h1 className="text-6xl font-bold text-[#7d2d5c] mb-2">Social</h1>
+              <h1 className="text-6xl font-bold text-mcmaster-maroon mb-2">Social</h1>
               <p className="text-xl text-gray-600">Monthly Leaderboard (May 2025)</p>
             </div>
             <div className="relative w-80">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white w-4 h-4" />
               <Input
                 placeholder="Search Name..."
-                className="bg-[#7d2d5c] border-[#7d2d5c] text-white placeholder:text-white/70 pl-10 rounded-full"
+                className="bg-mcmaster-maroon border-mcmaster-maroon text-white placeholder:text-white/70 pl-10 rounded-full"
                 // TODO: Add onChange handler to filter leaderboard data
               />
             </div>
@@ -86,7 +88,7 @@ export default function SocialScreen() {
               topUsers.map((user) => (
                 <div
                   key={user.rank}
-                  className="bg-[#7d2d5c] text-white px-8 py-4 rounded-full flex items-center gap-4 min-w-fit"
+                  className="bg-mcmaster-maroon text-white px-8 py-4 rounded-full flex items-center gap-4 min-w-fit"
                 >
                   <span className="text-4xl font-bold">{user.rank}</span>
                   <div>
@@ -127,3 +129,4 @@ export default function SocialScreen() {
     </div>
   )
 }
+
