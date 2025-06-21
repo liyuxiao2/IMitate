@@ -45,23 +45,9 @@ export default function Navigation({user }: NavigationProps) {
 
       {/* ✅ Navigation Bar */}
       <nav className="bg-mcmaster-maroon shadow-lg relative z-40">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between py-4">
-            <div className="flex items-center gap-4">
-              <img
-                src="/IMlogo.png"
-                alt="Logo"
-                className="w-10 h-10 rounded-full object-contain"
-              />
-              <button
-                onClick={() => setPanelOpen(!panelOpen)}
-                className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-mcmaster-maroon font-bold hover:scale-110 transition-transform duration-300"
-                title="Toggle Profile Panel"
-              >
-                👤
-              </button>
-            </div>
-
+        <div className=" mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-end py-4">
+            {/* ✅ Navigation links on left */}
             <ul className="flex space-x-6">
               {navItems.map((item) => (
                 <li key={item}>
@@ -74,6 +60,24 @@ export default function Navigation({user }: NavigationProps) {
                 </li>
               ))}
             </ul>
+
+           
+             <div className="flex items-center gap-3 ml-4">
+               {/* ✅ Logo and Profile button on right */}
+            <button
+                onClick={() => setPanelOpen(!panelOpen)}
+                className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-mcmaster-maroon font-bold hover:scale-110 transition-transform duration-300"
+                title="Toggle Profile Panel"
+              >
+                👤
+              </button>
+              <img
+                src="/IMlogo.png"
+                alt="Logo"
+                className="w-10 h-10 rounded-full object-contain"
+              />
+
+            </div>
           </div>
         </div>
       </nav>
