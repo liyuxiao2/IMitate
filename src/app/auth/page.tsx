@@ -1,18 +1,21 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Navigation from "@/components/ui/navigation";
 import { supabase } from "@/lib/supabaseClient";
 
 const AuthForm = () => {
+  const router = useRouter();
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [username, setUsername] = useState("");
+  const [profilePicture, setProfilePicture] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -60,7 +63,7 @@ const AuthForm = () => {
       setError(error.message);
     } else {
       setMessage("Logged in successfully! Redirecting...");
-      // You can redirect the user here, e.g., router.push('/chat')
+      router.push("/chat");
     }
   };
 
