@@ -164,6 +164,8 @@ async def evaluate_performance(request: EvaluationRequest):
     evaluation_rubric = """
     Scoring System (Total 50 pts):
     - Correct Diagnosis: 25 pts (Is the submitted diagnosis correct? If yes award 25 pts, if no overlap award 0 pts, partial points if partial overlap)
+    Scoring System (Total 50 pts):
+    - Correct Diagnosis: 25 pts (Is the submitted diagnosis correct?)
     - OLDCARTS Mnemonic: 12 pts (1.5 pts for each component: Onset, Location, Duration, Character, Aggravating/Alleviating factors, Radiation, Temporal pattern, Severity)
     - Differential Diagnoses: 5 pts (Did the student consider other plausible diagnoses?)
     - History Gathering: 4 pts (Did they ask about relevant medical, family, or social history?)
@@ -198,8 +200,8 @@ async def evaluate_performance(request: EvaluationRequest):
     **VERY IMPORTANT:** Your final response MUST begin with the total score as a single integer on the very first line, followed by a newline character. For example:
     50
     
-    
-    The student correctly identified the condition...   
+    **Correct Diagnosis: 25/25**
+    The student correctly identified the condition...
     """
 
     gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={GEMINI_API_KEY}"
