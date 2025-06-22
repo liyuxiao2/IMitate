@@ -4,9 +4,9 @@ from fastapi.middleware.cors import CORSMiddleware
 import httpx
 import os
 from dotenv import load_dotenv
-from .data.database import get_random_patient
+from data.database import get_random_patient
 import traceback
-from .supabase.supabase_client import supabase, supabase_admin
+from supabase.supabase_client import supabase, supabase_admin
 from uuid import UUID
 from typing import List
 
