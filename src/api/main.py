@@ -133,18 +133,18 @@ async def evaluate_performance(request: EvaluationRequest):
     and a defined rubric.
     """
     evaluation_rubric = """
-    Scoring System (Total 45 pts):
-    - Correct Diagnosis: 25 pts (Is the submitted diagnosis correct?)
+    Scoring System (Total 50 pts):
+    - Correct Diagnosis: 25 pts (Is the submitted diagnosis correct? If yes award 25 pts, if no overlap award 0 pts, partial points if partial overlap)
     - OLDCARTS Mnemonic: 12 pts (1.5 pts for each component: Onset, Location, Duration, Character, Aggravating/Alleviating factors, Radiation, Temporal pattern, Severity)
-    - Associated Symptom Questions: 5 pts (Did they ask about relevant positive/negative symptoms?)
+    - Differential Diagnoses: 5 pts (Did the student consider other plausible diagnoses?)
     - History Gathering: 4 pts (Did they ask about relevant medical, family, or social history?)
     - Logical, Focused Reasoning: 2 pts (Was the questioning logical and not random?)
     - Timing Bonus: 2 pts (Deduct 0.5 pts per minute over 5 minutes, max deduction at 9 minutes)
+    If a category is not applicable, award full points for that category.
     """
 
     prompt = f"""
-    You are an expert medical education evaluator. Your task is to analyze a simulated patient encounter and score the medical student's performance based on the provided data and a strict rubric.
-    Address the student as "you" in the first person.
+    You are an expert medical education evaluator. Your task is to analyze a simulated patient encounter and score the medical student's performance based on the provided data and a strict rubric. Do not pamper the student, be objective.
 
     **1. Full Patient Case:**
     ```json
@@ -169,8 +169,8 @@ async def evaluate_performance(request: EvaluationRequest):
     **VERY IMPORTANT:** Your final response MUST begin with the total score as a single integer on the very first line, followed by a newline character. For example:
     45
     
-    **Correct Diagnosis: 25/25**
-    The student correctly identified the condition...
+    
+    The student correctly identified the condition...   
     """
 
     gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={GEMINI_API_KEY}"
