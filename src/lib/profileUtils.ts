@@ -34,7 +34,7 @@ export async function uploadProfilePicture(file: File, userId: string): Promise<
     const fileExt = file.name.split('.').pop();
     const fileName = `${userId}/profile.${fileExt}`;
     
-    const { data: uploadData, error: uploadError } = await supabase.storage
+    const { error: uploadError } = await supabase.storage
       .from('profile-pictures')
       .upload(fileName, file, {
         upsert: true

@@ -11,7 +11,11 @@ import { Button } from "@/components/ui/button";
 interface HistoryEntry {
   id: number;
   user_id: string;
-  patient_info: { first_name: string; last_name: string; [key: string]: any };
+  patient_info: {
+    first_name: string;
+    last_name: string;
+    [key: string]: unknown;
+  };
   score: number;
   submitted_diagnosis: string;
   feedback: string;
@@ -87,18 +91,12 @@ export default function HistoryPage() {
             <table className="min-w-full">
               <thead className="bg-mcmaster-maroon text-white">
                 <tr>
-                  <th className="py-4 px-8 text-left font-semibold">
-                    Patient
-                  </th>
+                  <th className="py-4 px-8 text-left font-semibold">Patient</th>
                   <th className="py-4 px-8 text-left font-semibold">
                     Diagnosis
                   </th>
-                  <th className="py-4 px-8 text-left font-semibold">
-                    Score
-                  </th>
-                  <th className="py-4 px-8 text-left font-semibold">
-                    Date
-                  </th>
+                  <th className="py-4 px-8 text-left font-semibold">Score</th>
+                  <th className="py-4 px-8 text-left font-semibold">Date</th>
                   <th className="py-4 px-8"></th>
                 </tr>
               </thead>

@@ -24,7 +24,14 @@ interface LoadPatientParams {
   setIsModalOpen: (b: boolean) => void;
   setDiagnosisInput: (s: string) => void;
   setAftercareInput: (s: string) => void;
-  setMessages: (m: any) => void;
+  setMessages: (
+    m: Array<{
+      id: string;
+      type: "user" | "bot";
+      content: string;
+      timestamp: Date;
+    }>
+  ) => void;
   setIsIntroModalOpen: (b: boolean) => void;
 }
 

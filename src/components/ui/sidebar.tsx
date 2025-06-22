@@ -1,10 +1,11 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { Dumbbell, Users, History } from "lucide-react"
+import Link from "next/link";
+import Image from "next/image";
+import { Dumbbell, Users, History } from "lucide-react";
 
 interface SidebarProps {
-  activePage?: "Practice" | "Social" | "History"
+  activePage?: "Practice" | "Social" | "History";
 }
 
 export default function Sidebar({ activePage }: SidebarProps) {
@@ -12,14 +13,20 @@ export default function Sidebar({ activePage }: SidebarProps) {
     { name: "Practice", href: "/chat", icon: Dumbbell },
     { name: "Social", href: "/Career", icon: Users },
     { name: "History", href: "/History", icon: History },
-  ]
+  ];
 
   return (
     <div className="w-64 bg-mcmaster-maroon text-white flex-col shrink-0 hidden md:flex">
       {/* Logo */}
       <div className="p-6">
         <Link href="/">
-          <img src="/IMlogo.png" alt="IMitate Logo" className="h-12 w-auto" />
+          <Image
+            src="/IMlogo.png"
+            alt="IMitate Logo"
+            width={48}
+            height={48}
+            className="h-12 w-auto"
+          />
         </Link>
       </div>
 
@@ -43,5 +50,5 @@ export default function Sidebar({ activePage }: SidebarProps) {
         </div>
       </nav>
     </div>
-  )
-} 
+  );
+}
