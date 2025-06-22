@@ -9,6 +9,7 @@ import { supabase } from "@/lib/supabaseClient";
 interface LeaderboardUser {
   username: string;
   total_score: number;
+  profile_picture_url?: string;
 }
 
 export default function SocialScreen() {
@@ -21,7 +22,7 @@ export default function SocialScreen() {
       try {
         const { data, error } = await supabase
           .from("users")
-          .select("username, total_score")
+          .select("username, total_score, profile_picture_url")
           .order("total_score", { ascending: false });
 
         if (error) {
@@ -94,6 +95,7 @@ export default function SocialScreen() {
             {top3.length > 1 && (
               <div className="text-center">
                 <Avatar className="w-32 h-32 border-8 border-gray-400">
+                  <AvatarImage src={top3[1].profile_picture_url} />
                   <AvatarFallback>
                     <User className="w-16 h-16" />
                   </AvatarFallback>
@@ -117,6 +119,7 @@ export default function SocialScreen() {
             {top3.length > 0 && (
               <div className="text-center">
                 <Avatar className="w-40 h-40 border-8 border-yellow-400">
+                  <AvatarImage src={top3[0].profile_picture_url} />
                   <AvatarFallback>
                     <User className="w-20 h-20" />
                   </AvatarFallback>
@@ -140,6 +143,7 @@ export default function SocialScreen() {
             {top3.length > 2 && (
               <div className="text-center">
                 <Avatar className="w-32 h-32 border-8 border-yellow-600">
+                  <AvatarImage src={top3[2].profile_picture_url} />
                   <AvatarFallback>
                     <User className="w-16 h-16" />
                   </AvatarFallback>
@@ -177,7 +181,12 @@ export default function SocialScreen() {
                 className="bg-gray-300 rounded-full px-6 py-4 grid grid-cols-3 gap-4 items-center"
               >
                 <div className="text-gray-800 font-medium flex items-center gap-3">
-                  <User className="w-5 h-5 text-gray-600" />
+                  <Avatar className="w-8 h-8">
+                    <AvatarImage src={user.profile_picture_url} />
+                    <AvatarFallback>
+                      <User className="w-4 h-4" />
+                    </AvatarFallback>
+                  </Avatar>
                   {user.username}
                 </div>
                 <div className="text-center text-gray-700 font-semibold">
