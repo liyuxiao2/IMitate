@@ -38,18 +38,28 @@ supabase_admin: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 def get_random_patient():
     """Get a random patient from the SQLite database"""
     try:
-        # Try to connect to the database file
-        db_path = "patient_data.db"
-        if not os.path.exists(db_path):
-            # If not found in current directory, try parent directories
-            for i in range(3):
-                parent_path = "../" * i + "patient_data.db"
-                if os.path.exists(parent_path):
-                    db_path = parent_path
-                    break
+        # Try multiple possible locations for the database file
+        possible_paths = [
+            "patient_data.db",
+            "/app/patient_data.db", 
+            "/app/src/api/patient_data.db",
+            "../patient_data.db",
+            "../../patient_data.db"
+        ]
         
-        if not os.path.exists(db_path):
-            print(f"Database file not found: {db_path}")
+        db_path = None
+        for path in possible_paths:
+            if os.path.exists(path):
+                db_path = path
+                print(f"Found database at: {path}")
+                break
+        
+        if not db_path:
+            print(f"Database file not found in any of these locations:")
+            for path in possible_paths:
+                print(f"  - {path} (exists: {os.path.exists(path)})")
+            print(f"Current working directory: {os.getcwd()}")
+            print(f"Files in current directory: {os.listdir('.')}")
             return None
             
         conn = sqlite3.connect(db_path)
@@ -62,13 +72,17 @@ def get_random_patient():
         conn.close()
         
         if patients:
-            return random.choice(patients)
+            selected_patient = random.choice(patients)
+            print(f"Selected patient: {selected_patient[1]} {selected_patient[2]}")  # first_name last_name
+            return selected_patient
         else:
             print("No patients found in database")
             return None
             
     except Exception as e:
         print(f"Database error: {e}")
+        import traceback
+        traceback.print_exc()
         return None
 
 app = FastAPI()

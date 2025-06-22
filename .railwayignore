@@ -33,4 +33,6 @@ PROFILE_PICTURES.md
 !Procfile
 !railway.json
 !nixpacks.toml
+!patient_data.db
+!src/api/patient_data.db
 !.env* 
