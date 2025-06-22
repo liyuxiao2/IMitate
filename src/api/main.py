@@ -5,11 +5,10 @@ import httpx
 import os
 from dotenv import load_dotenv
 import traceback
-from uuid import UUID
 from typing import List
 import sqlite3
 import random
-
+from .data.database import get_random_patient
 # Load environment variables
 load_dotenv()
 
@@ -17,8 +16,8 @@ load_dotenv()
 from supabase import create_client, Client
 
 # Try both frontend and backend environment variable names
-SUPABASE_URL = os.getenv("SUPABASE_URL") or os.getenv("NEXT_PUBLIC_SUPABASE_URL")
-SUPABASE_KEY = os.getenv("SUPABASE_ANON_KEY") or os.getenv("NEXT_PUBLIC_SUPABASE_ANON_KEY")
+SUPABASE_URL = os.getenv("SUPABASE_URL") 
+SUPABASE_KEY = os.getenv("SUPABASE_ANON_KEY")
 SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY")
 
 if not SUPABASE_URL:
@@ -34,56 +33,6 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 # Admin client that bypasses RLS (for trusted server-side operations)
 supabase_admin: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 
-# Database function (embedded to avoid import issues)
-def get_random_patient():
-    """Get a random patient from the SQLite database"""
-    try:
-        # Try multiple possible locations for the database file
-        possible_paths = [
-            "patient_data.db",
-            "/app/patient_data.db", 
-            "/app/src/api/patient_data.db",
-            "../patient_data.db",
-            "../../patient_data.db"
-        ]
-        
-        db_path = None
-        for path in possible_paths:
-            if os.path.exists(path):
-                db_path = path
-                print(f"Found database at: {path}")
-                break
-        
-        if not db_path:
-            print(f"Database file not found in any of these locations:")
-            for path in possible_paths:
-                print(f"  - {path} (exists: {os.path.exists(path)})")
-            print(f"Current working directory: {os.getcwd()}")
-            print(f"Files in current directory: {os.listdir('.')}")
-            return None
-            
-        conn = sqlite3.connect(db_path)
-        cursor = conn.cursor()
-        
-        # Get all patients
-        cursor.execute("SELECT * FROM patients")
-        patients = cursor.fetchall()
-        
-        conn.close()
-        
-        if patients:
-            selected_patient = random.choice(patients)
-            print(f"Selected patient: {selected_patient[1]} {selected_patient[2]}")  # first_name last_name
-            return selected_patient
-        else:
-            print("No patients found in database")
-            return None
-            
-    except Exception as e:
-        print(f"Database error: {e}")
-        import traceback
-        traceback.print_exc()
-        return None
 
 app = FastAPI()
 
