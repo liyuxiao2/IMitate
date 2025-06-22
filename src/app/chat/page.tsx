@@ -6,14 +6,7 @@ import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  User,
-  Bot,
-  Send,
-  Mic,
-  MicOff,
-  X,
-} from "lucide-react";
+import { User, Bot, Send, Mic, MicOff, X } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import startSpeechRecognition from "./voice";
 import Sidebar from "@/components/ui/sidebar";
@@ -29,8 +22,6 @@ interface Message {
   content: string;
   timestamp: Date;
 }
-
-
 
 export default function ChatBot() {
   const [messages, setMessages] = useState<Message[]>([
@@ -171,7 +162,7 @@ export default function ChatBot() {
     ]);
   };
 
-   const handleStartNewCase = () => {
+  const handleStartNewCase = () => {
     setViewMode("chat");
     setEvaluationResult(null);
 
@@ -187,34 +178,52 @@ export default function ChatBot() {
       setMessages,
       setIsIntroModalOpen, // ✅ now required
     });
-  }
+  };
 
   const handleSubmitDiagnosis = async (score: number) => {
-      const token = (await supabase.auth.getSession()).data.session?.access_token;
-      console.log("Submitting score:", score);
+    const token = (await supabase.auth.getSession()).data.session?.access_token;
+    console.log("Submitting score:", score);
 
-      try {
-        const res = await fetch("http://localhost:8000/addScore", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ score: score })
-        });
+    try {
+      const res = await fetch("http://localhost:8000/addScore", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ score: score }),
+      });
 
-        if (!res.ok) {
-          throw new Error("Failed to update score");
-        }
-
-        const result = await res.json();
-        console.log("Score updated successfully:", result);
-      } catch (err) {
-        console.error("Error adding score:", err);
+      if (!res.ok) {
+        throw new Error("Failed to update score");
       }
-  }
 
-  
+      const result = await res.json();
+      console.log("Score updated successfully:", result);
+    } catch (err) {
+      console.error("Error adding score:", err);
+    }
+
+    try {
+      const user_response = supabase.auth.getUser(token);
+      const res = await fetch("http://localhost:8000/addMatch", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          user_id: user_response.user.id,
+          patient_info: patient,
+          score: score,
+          submitted_diagnosis: diagnosisInput,
+          submitted_aftercare: aftercareInput,
+        }),
+      });
+    } catch (err) {
+      console.error("Error adding match:", err);
+    }
+  };
 
   return (
     <div className="flex h-screen bg-stone-200 font-sans">
@@ -324,7 +333,7 @@ export default function ChatBot() {
                   const result = await res.json();
                   setEvaluationResult(result.evaluation);
                   setEvaluationScore(result.score);
-                  
+
                   handleSubmitDiagnosis(result.score);
                   setViewMode("results");
                 } catch (error) {
@@ -475,7 +484,6 @@ export default function ChatBot() {
                       ) : (
                         <MicOff className="w-4 h-4" />
                       )}
-
                     </Button>
                     <Button
                       type="submit"
@@ -492,21 +500,20 @@ export default function ChatBot() {
               {/* Patient Info & Notes Column */}
               <div className="lg:col-span-1 space-y-6">
                 {/* Timer */}
-                
+
                 <div className="bg-transparent rounded-xl">
                   <div className="bg-[#7a003c] text-white font-semibold py-2 px-4 rounded-t-xl">
                     Timer
                   </div>
 
                   <CountdownTimer
-                      seconds={600}
-                      onTimeout={() => {
-                        setIsTyping(true);       
-                        setIsListening(false);
-                        setEvaluationResult("❌ You ran out of time.")
-                      }}
-                      
-                    />
+                    seconds={600}
+                    onTimeout={() => {
+                      setIsTyping(true);
+                      setIsListening(false);
+                      setEvaluationResult("❌ You ran out of time.");
+                    }}
+                  />
                 </div>
 
                 {/* Patient Info */}

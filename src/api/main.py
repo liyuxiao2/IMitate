@@ -7,6 +7,9 @@ from dotenv import load_dotenv
 from .data.database import get_random_patient
 import traceback
 from .supabase.supabase_client import supabase, supabase_admin
+from uuid import UUID
+
+
 load_dotenv()
 
 app = FastAPI()
@@ -19,12 +22,11 @@ app = FastAPI()
 # Allow frontend (adjust if needed)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Replace * with your frontend URL in production
+    allow_origins=["http://localhost:3000"],  # <-- your exact front-end URL
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "OPTIONS"],  # or ["*"]
+    allow_headers=["Authorization", "Content-Type"],  # or ["*"]
 )
-
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 class ChatRequest(BaseModel):
@@ -64,6 +66,15 @@ class LeaderboardEntry(BaseModel):
     username: str
     total_score: int
     profile_picture_url: str | None
+    
+class AddMatchPayload(BaseModel):
+    user_id: UUID
+    patient_info: PatientData
+    score: int
+    submitted_diagnosis: str
+    submitted_aftercare: str
+    feedback: str
+
 
 @app.post("/chat")
 async def chat_endpoint(request: ChatRequest):
@@ -306,3 +317,30 @@ async def update_profile_picture(request: Request, body: ProfilePictureUpdate):
         # Generic error for production
         print(f"An unexpected error occurred while updating profile picture for user {user_id}: {e}")
         raise HTTPException(status_code=500, detail="An internal server error occurred.")
+
+@app.post("/addMatch")
+async def add_match(request: Request, payload: AddMatchPayload):
+    auth_header = request.headers.get("authorization") or ""
+    if not auth_header.startswith("Bearer "):
+        raise HTTPException(401, "Missing auth token")
+    token = auth_header.split(" ", 1)[1]
+    user_response = supabase.auth.get_user(token)
+    if user_response.user is None or str(user_response.user.id) != str(payload.user_id):
+        raise HTTPException(403, "Invalid user")
+
+    # Insert into history via the Admin client (bypasses RLS)
+    insert_resp = supabase_admin.table("history").insert({
+        "user_id": str(payload.user_id),
+        "patient_info": payload.patient_info.dict(),
+        "score": payload.score,
+        "submitted_diagnosis": payload.submitted_diagnosis,
+        "submitted_aftercare": payload.submitted_aftercare,
+        "feedback": payload.feedback
+    }).execute()
+
+    if insert_resp.error:
+        # something went wrong
+        raise HTTPException(500, f"DB error: {insert_resp.error.message}")
+
+    # insert_resp.data is a list of the rows you just created
+    return insert_resp.data[0]
