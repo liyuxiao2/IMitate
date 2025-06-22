@@ -5,7 +5,7 @@ import httpx
 import os
 from dotenv import load_dotenv
 from .data.database import get_random_patient
-from .supabase.supabase_client import supabase
+from .supabase.supabase_client import supabase, supabase_admin
 
 load_dotenv()
 
@@ -48,6 +48,18 @@ class EvaluationRequest(BaseModel):
     chatHistory: str
     submittedDiagnosis: str
     submittedAftercare: str
+
+class ScoreUpdate(BaseModel):
+    uid: str    # matches users.id (UUID)
+    score: int  # amount to add
+
+class ProfilePictureUpdate(BaseModel):
+    profile_picture_url: str
+
+class LeaderboardEntry(BaseModel):
+    username: str
+    total_score: int
+    profile_picture_url: str | None
 
 @app.post("/chat")
 async def chat_endpoint(request: ChatRequest):
@@ -203,7 +215,62 @@ async def get_user(request: Request):
     token = auth_header.replace("Bearer ", "")
     user_response = supabase.auth.get_user(token)
 
-    if user_response.user is None:
+    if user_response is None or user_response.user is None:
         raise HTTPException(status_code=401, detail="Invalid token")
 
     return user_response.user
+
+
+@app.get("/getLeaderboard")
+async def get_leaderboard():
+    """
+    Get the global leaderboard sorted by total_score in descending order.
+    Returns users with their username, total_score, and profile_picture_url.
+    """
+    response = supabase_admin.table("users").select("username, total_score, profile_picture_url").order("total_score", desc=True).execute()
+    print(response.data)
+    return response.data
+
+
+@app.post("/updateProfilePicture")
+async def update_profile_picture(request: Request, body: ProfilePictureUpdate):
+    """
+    Update the current user's profile picture URL.
+    Requires authentication.
+    """
+    try:
+        auth_header = request.headers.get("authorization")
+
+        if not auth_header or not auth_header.startswith("Bearer "):
+            raise HTTPException(status_code=401, detail="Missing or invalid Authorization header")
+
+        token = auth_header.replace("Bearer ", "")
+        user_response = supabase.auth.get_user(token)
+
+        if user_response is None or user_response.user is None:
+            raise HTTPException(status_code=401, detail="Invalid token")
+
+        user_id = user_response.user.id
+
+        # Use the admin client to bypass RLS for the update
+        update_response = supabase_admin.table("users").update({
+            "profile_picture_url": body.profile_picture_url
+        }).eq("id", user_id).execute()
+
+        if not update_response.data:
+            # This could happen if the user ID doesn't exist, even with admin rights
+            raise HTTPException(status_code=404, detail="User not found or failed to update profile picture")
+
+        updated_user = update_response.data[0]
+        
+        return {
+            "username": updated_user["username"],
+            "profile_picture_url": updated_user["profile_picture_url"]
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        # Generic error for production
+        print(f"An unexpected error occurred while updating profile picture for user {user_id}: {e}")
+        raise HTTPException(status_code=500, detail="An internal server error occurred.")
