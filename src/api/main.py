@@ -4,13 +4,72 @@ from fastapi.middleware.cors import CORSMiddleware
 import httpx
 import os
 from dotenv import load_dotenv
-from data.database import get_random_patient
 import traceback
-from supabase.supabase_client import supabase, supabase_admin
 from uuid import UUID
 from typing import List
+import sqlite3
+import random
 
+# Load environment variables
 load_dotenv()
+
+# Supabase configuration (embedded to avoid import issues)
+from supabase import create_client, Client
+
+# Try both frontend and backend environment variable names
+SUPABASE_URL = os.getenv("SUPABASE_URL") or os.getenv("NEXT_PUBLIC_SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_ANON_KEY") or os.getenv("NEXT_PUBLIC_SUPABASE_ANON_KEY")
+SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY")
+
+if not SUPABASE_URL:
+    raise ValueError("Missing Supabase URL environment variable. Set SUPABASE_URL.")
+if not SUPABASE_KEY:
+    raise ValueError("Missing Supabase Anon Key environment variable. Set SUPABASE_ANON_KEY.")
+if not SUPABASE_SERVICE_KEY:
+    raise ValueError("Missing Supabase Service Key environment variable. Set SUPABASE_SERVICE_KEY.")
+
+# Client for frontend-like access (auth, anon RLS)
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+# Admin client that bypasses RLS (for trusted server-side operations)
+supabase_admin: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+
+# Database function (embedded to avoid import issues)
+def get_random_patient():
+    """Get a random patient from the SQLite database"""
+    try:
+        # Try to connect to the database file
+        db_path = "patient_data.db"
+        if not os.path.exists(db_path):
+            # If not found in current directory, try parent directories
+            for i in range(3):
+                parent_path = "../" * i + "patient_data.db"
+                if os.path.exists(parent_path):
+                    db_path = parent_path
+                    break
+        
+        if not os.path.exists(db_path):
+            print(f"Database file not found: {db_path}")
+            return None
+            
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        
+        # Get all patients
+        cursor.execute("SELECT * FROM patients")
+        patients = cursor.fetchall()
+        
+        conn.close()
+        
+        if patients:
+            return random.choice(patients)
+        else:
+            print("No patients found in database")
+            return None
+            
+    except Exception as e:
+        print(f"Database error: {e}")
+        return None
 
 app = FastAPI()
 
