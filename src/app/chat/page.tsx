@@ -67,6 +67,13 @@ export default function ChatBot() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  useEffect(() => {
+  if (evaluationResult !== null) {
+    console.log("Eval Result updated:", evaluationResult);
+  }
+}, [evaluationResult]);
+
+
   const addMessage = (type: "user" | "bot", content: string) => {
     const newMessage: Message = {
       id: Date.now().toString(),
@@ -164,9 +171,7 @@ export default function ChatBot() {
 
   const handleStartNewCase = () => {
     setViewMode("chat");
-    setEvaluationResult(null);
 
-    setEvaluationScore(0);
     // loadPatient will handle resetting all other relevant states
     loadPatient({
       setPatient,
@@ -204,22 +209,28 @@ export default function ChatBot() {
       console.error("Error adding score:", err);
     }
 
+    
+
     try {
-      const user_response = supabase.auth.getUser(token);
+      console.log("Eval Result", evaluationResult);
       const res = await fetch("http://localhost:8000/addMatch", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify({
-          user_id: user_response.user.id,
-          patient_info: patient,
-          score: score,
-          submitted_diagnosis: diagnosisInput,
-          submitted_aftercare: aftercareInput,
-        }),
+          patient_info: patient,               // object (dictionary)
+          submitted_diagnosis: diagnosisInput, // string
+          submitted_aftercare: aftercareInput, // string
+          score: score,                         // number
+          feedback: evaluationResult ?? "nothing to see here"
+        })
       });
+      // setEvaluationResult("big penis");
+      // setEvaluationScore(0);
+      const result = await res.json();
+      console.log("Score updated successfully:", result);
     } catch (err) {
       console.error("Error adding match:", err);
     }
@@ -332,6 +343,7 @@ export default function ChatBot() {
 
                   const result = await res.json();
                   setEvaluationResult(result.evaluation);
+                  setEvaluationResult(evaluationResult);
                   setEvaluationScore(result.score);
 
                   handleSubmitDiagnosis(result.score);

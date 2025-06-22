@@ -8,7 +8,7 @@ from .data.database import get_random_patient
 import traceback
 from .supabase.supabase_client import supabase, supabase_admin
 from uuid import UUID
-
+from typing import List
 
 load_dotenv()
 
@@ -66,6 +66,29 @@ class LeaderboardEntry(BaseModel):
     username: str
     total_score: int
     profile_picture_url: str 
+
+class AddMatchPayload(BaseModel):
+    patient_info: dict   # use dict if you are directly passing a JSON object
+    score: int
+    submitted_diagnosis: str
+    submitted_aftercare: str
+    feedback: str
+    
+class HistoryRequest(BaseModel):
+    user_id: str
+
+class HistoryEntry(BaseModel):
+    id: int
+    user_id: str
+    patient_info: dict
+    score: int
+    submitted_diagnosis: str
+    submitted_aftercare: str
+    feedback: str
+    created_at: str
+
+
+    
 
 @app.post("/chat")
 async def chat_endpoint(request: ChatRequest):
@@ -317,27 +340,67 @@ async def update_profile_picture(request: Request, body: ProfilePictureUpdate):
 
 @app.post("/addMatch")
 async def add_match(request: Request, payload: AddMatchPayload):
-    auth_header = request.headers.get("authorization") or ""
-    if not auth_header.startswith("Bearer "):
-        raise HTTPException(401, "Missing auth token")
-    token = auth_header.split(" ", 1)[1]
+    auth_header = request.headers.get("authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Missing or invalid Authorization header")
+
+    token = auth_header.replace("Bearer ", "")
     user_response = supabase.auth.get_user(token)
-    if user_response.user is None or str(user_response.user.id) != str(payload.user_id):
+
+    if user_response.user is None:
         raise HTTPException(403, "Invalid user")
 
-    # Insert into history via the Admin client (bypasses RLS)
+    user_id = user_response.user.id
+
     insert_resp = supabase_admin.table("history").insert({
-        "user_id": str(payload.user_id),
-        "patient_info": payload.patient_info.dict(),
+        "user_id": str(user_id),
+        "patient_info": payload.patient_info,
         "score": payload.score,
         "submitted_diagnosis": payload.submitted_diagnosis,
         "submitted_aftercare": payload.submitted_aftercare,
         "feedback": payload.feedback
     }).execute()
+    
+    if not insert_resp.data:
+        raise HTTPException(500, "Failed to insert match history.")
 
-    if insert_resp.error:
-        # something went wrong
-        raise HTTPException(500, f"DB error: {insert_resp.error.message}")
-
-    # insert_resp.data is a list of the rows you just created
     return insert_resp.data[0]
+
+@app.get("/fetchHistory", response_model=List[HistoryEntry])
+async def fetch_history(request: Request):
+    """
+    Fetches a user's match history from the database,
+    sorted by most recent.
+    Requires authorization.
+    """
+    try:
+        auth_header = request.headers.get("authorization")
+        if not auth_header or not auth_header.startswith("Bearer "):
+            raise HTTPException(status_code=401, detail="Missing or invalid Authorization header")
+
+        token = auth_header.replace("Bearer ", "")
+        user_response = supabase.auth.get_user(token)
+
+        if user_response.user is None:
+            raise HTTPException(status_code=401, detail="Invalid token")
+
+        user_id = user_response.user.id
+
+        # Query Supabase for this user's history, sorted by most recent
+        response = supabase_admin.table("history")\
+            .select("*")\
+            .eq("user_id", user_id)\
+            .order("created_at", desc=True)\
+            .execute()
+
+        if not response.data:
+            return []
+
+        return response.data
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        print("🔥 Error fetching history:", e)
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail="An internal server error occurred.")
