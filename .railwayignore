@@ -1,0 +1,16 @@
+# Ignore frontend files for Railway deployment
+node_modules/
+.next/
+.vercel/
+src/app/
+src/components/
+src/lib/
+public/
+*.json
+*.js
+*.ts
+*.tsx
+!src/api/
+!requirements.txt
+!Procfile
+!railway.json 

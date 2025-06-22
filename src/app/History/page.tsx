@@ -7,6 +7,7 @@ import Sidebar from "@/components/ui/sidebar";
 import Header from "@/components/ui/header";
 import { supabase } from "@/lib/supabaseClient";
 import { Button } from "@/components/ui/button";
+import { API_BASE_URL } from "@/lib/apiConfig";
 
 interface HistoryEntry {
   id: number;
@@ -47,7 +48,7 @@ export default function HistoryPage() {
         return;
       }
       try {
-        const res = await fetch("http://localhost:8000/fetchHistory", {
+        const res = await fetch(`${API_BASE_URL}/fetchHistory`, {
           method: "GET",
           headers: { Authorization: `Bearer ${session.access_token}` },
         });

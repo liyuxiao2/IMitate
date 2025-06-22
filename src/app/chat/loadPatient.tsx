@@ -1,4 +1,6 @@
 // loadPatient.ts
+import { apiEndpoints } from "@/lib/apiConfig";
+
 export interface Patient {
   id: string;
   first_name: string;
@@ -52,7 +54,7 @@ export async function loadPatient({
   setAftercareInput("");
 
   try {
-    const res = await fetch(`http://localhost:8000/patients/random`);
+    const res = await fetch(apiEndpoints.getRandomPatient);
     console.log("Fetch completed with status", res.status);
     const data = await res.json();
     console.log("Received data:", data);

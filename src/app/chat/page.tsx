@@ -14,6 +14,7 @@ import CountdownTimer from "@/components/ui/timer";
 import { loadPatient } from "./loadPatient";
 import { supabase } from "@/lib/supabaseClient";
 import startSpeechRecognition from "./voice";
+import { apiEndpoints } from "@/lib/apiConfig";
 
 interface Message {
   id: string;
@@ -101,7 +102,7 @@ export default function ChatBot() {
 
   const fetchGeminiResponse = async (userInput: string): Promise<string> => {
     try {
-      const res = await fetch("http://localhost:8000/chat", {
+      const res = await fetch(apiEndpoints.chat, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prompt: userInput }),
@@ -201,7 +202,7 @@ export default function ChatBot() {
     const token = (await supabase.auth.getSession()).data.session?.access_token;
 
     try {
-      const res = await fetch("http://localhost:8000/addScore", {
+      const res = await fetch(apiEndpoints.addScore, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -222,7 +223,7 @@ export default function ChatBot() {
 
     try {
       console.log("Eval Result", evaluationResult);
-      const res = await fetch("http://localhost:8000/addMatch", {
+      const res = await fetch(apiEndpoints.addMatch, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -338,7 +339,7 @@ export default function ChatBot() {
 
                 try {
                   console.log("Submitting for evaluation...", evaluationData);
-                  const res = await fetch("http://localhost:8000/evaluate", {
+                  const res = await fetch(apiEndpoints.evaluate, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(evaluationData),
