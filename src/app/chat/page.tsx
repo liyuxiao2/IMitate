@@ -185,9 +185,12 @@ export default function ChatBot() {
     });
   };
 
-  const handleSubmitDiagnosis = async (score: number) => {
-    const token = (await supabase.auth.getSession()).data.session?.access_token;
-    console.log("Submitting score:", score);
+  async function handleSubmitDiagnosis(
+      score: number,
+      feedbackText: string
+    ) {
+      const token = (await supabase.auth.getSession())
+        .data.session?.access_token;
 
     try {
       const res = await fetch("http://localhost:8000/addScore", {
@@ -224,11 +227,9 @@ export default function ChatBot() {
           submitted_diagnosis: diagnosisInput, // string
           submitted_aftercare: aftercareInput, // string
           score: score,                         // number
-          feedback: evaluationResult ?? "nothing to see here"
+          feedback: feedbackText ?? "No History Saved"
         })
       });
-      // setEvaluationResult("big penis");
-      // setEvaluationScore(0);
       const result = await res.json();
       console.log("Score updated successfully:", result);
     } catch (err) {
@@ -342,11 +343,14 @@ export default function ChatBot() {
                   }
 
                   const result = await res.json();
-                  setEvaluationResult(result.evaluation);
-                  setEvaluationResult(evaluationResult);
-                  setEvaluationScore(result.score);
 
-                  handleSubmitDiagnosis(result.score);
+                  const feedbackText = result.evaluation;
+                  const score = result.score;
+                  
+                  setEvaluationResult(feedbackText);
+                  setEvaluationScore(score);
+
+                  handleSubmitDiagnosis(score, feedbackText);
                   setViewMode("results");
                 } catch (error) {
                   console.error("Failed to submit evaluation:", error);
