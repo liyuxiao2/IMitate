@@ -1,26 +1,35 @@
-# Frontend files to ignore
+# Completely ignore all Node.js/Frontend files
+package.json
+package-lock.json
 node_modules/
 .next/
 .vercel/
-src/app/
-src/components/
-src/lib/supabaseClient.ts
-src/lib/utils.ts
-src/lib/profileUtils.ts
-src/types/
-public/
-*.md
-package*.json
 tsconfig.json
 next.config.ts
+next-env.d.ts
 postcss.config.mjs
 eslint.config.mjs
 components.json
 tailwind.config.ts
 
-# Keep backend files
+# Ignore all frontend source code
+src/app/
+src/components/
+src/lib/
+src/types/
+public/
+
+# Ignore documentation and config files
+*.md
+README.md
+DEPLOYMENT_GUIDE.md
+PROFILE_PICTURES.md
+
+# Keep only backend essentials
 !src/api/
+!main.py
 !requirements.txt
+!runtime.txt
 !Procfile
 !railway.json
 !nixpacks.toml
