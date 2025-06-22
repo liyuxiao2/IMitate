@@ -47,26 +47,29 @@ export default function startSpeechRecognition(
     const recognition = new SpeechRecognition();
 
     let finalTranscript = '';
+    let silenceTimeout: ReturnType<typeof setTimeout> | null = null;
 
-    recognition.continuous = false; // 👈 safer for short bursts of speech
+    recognition.continuous = true; // allow continuous input
     recognition.interimResults = true;
     recognition.lang = 'en-US';
 
     recognition.onstart = () => {
       console.log('Speech recognition started');
       if (onStart) onStart();
-
-      // ⏱️ Stop listening after 5 seconds
-      setTimeout(() => {
-        recognition.stop(); // 👈 manually end it after 5s
-      }, 5000);
     };
 
     recognition.onresult = (event) => {
+      // Reset silence timer
+      if (silenceTimeout) clearTimeout(silenceTimeout);
+      silenceTimeout = setTimeout(() => {
+        console.log('1 second of silence detected — stopping recognition');
+        recognition.stop();
+      }, 1000);
+
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const transcript = event.results[i][0].transcript;
         if (event.results[i].isFinal) {
-          finalTranscript += transcript;
+          finalTranscript += transcript + ' ';
         }
       }
     };
@@ -74,22 +77,11 @@ export default function startSpeechRecognition(
     recognition.onend = () => {
       console.log('Speech recognition ended');
       if (onStop) onStop();
-
-      setTimeout(() => {
-        console.log('Final transcript:', finalTranscript);
-        resolve(finalTranscript.trim());
-      }, 500);
+      resolve(finalTranscript.trim());
     };
 
     recognition.onerror = (event) => {
       console.warn('Speech recognition error:', event.error);
-
-      if (event.error === "aborted") {
-        if (onStop) onStop();
-        resolve(finalTranscript.trim());
-        return;
-      }
-
       if (onStop) onStop();
       reject(new Error(`Speech recognition error: ${event.error}`));
     };

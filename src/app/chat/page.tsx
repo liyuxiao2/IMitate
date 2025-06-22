@@ -21,6 +21,8 @@ import { loadPatient, Patient } from "./loadPatient";
 import CountdownTimer from "@/components/ui/timer";
 
 import Header from "@/components/ui/header";
+import { supabase } from "@/lib/supabaseClient";
+
 interface Message {
   id: string;
   type: "user" | "bot";
@@ -51,6 +53,7 @@ export default function ChatBot() {
   const [aftercareInput, setAftercareInput] = useState("");
   const [viewMode, setViewMode] = useState<"chat" | "results">("chat");
   const [evaluationResult, setEvaluationResult] = useState<string | null>(null);
+  const [evaluationScore, setEvaluationScore] = useState(0);
   const [isEvaluating, setIsEvaluating] = useState(false);
   const [isIntroModalOpen, setIsIntroModalOpen] = useState(false);
 
@@ -170,6 +173,7 @@ export default function ChatBot() {
    const handleStartNewCase = () => {
     setViewMode("chat");
     setEvaluationResult(null);
+    setEvaluationScore(0);
     // loadPatient will handle resetting all other relevant states
     loadPatient({
       setPatient,
@@ -181,6 +185,31 @@ export default function ChatBot() {
       setMessages,
       setIsIntroModalOpen, // ✅ now required
     });
+  }
+
+  const handleSubmitDiagnosis = async (score: number) => {
+      const token = (await supabase.auth.getSession()).data.session?.access_token;
+      console.log("Submitting score:", score);
+
+      try {
+        const res = await fetch("http://localhost:8000/addScore", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ score: score })
+        });
+
+        if (!res.ok) {
+          throw new Error("Failed to update score");
+        }
+
+        const result = await res.json();
+        console.log("Score updated successfully:", result);
+      } catch (err) {
+        console.error("Error adding score:", err);
+      }
   }
 
   
@@ -292,6 +321,9 @@ export default function ChatBot() {
 
                   const result = await res.json();
                   setEvaluationResult(result.evaluation);
+                  setEvaluationScore(result.score);
+                  
+                  handleSubmitDiagnosis(result.score);
                   setViewMode("results");
                 } catch (error) {
                   console.error("Failed to submit evaluation:", error);

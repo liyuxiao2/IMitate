@@ -6,6 +6,7 @@ import os
 from dotenv import load_dotenv
 from .data.database import get_random_patient
 from .supabase.supabase_client import supabase
+import traceback
 
 load_dotenv()
 
@@ -48,6 +49,10 @@ class EvaluationRequest(BaseModel):
     chatHistory: str
     submittedDiagnosis: str
     submittedAftercare: str
+    
+class ScorePayload(BaseModel):
+    score: int
+
 
 @app.post("/chat")
 async def chat_endpoint(request: ChatRequest):
@@ -187,3 +192,38 @@ async def get_user(request: Request):
         raise HTTPException(status_code=401, detail="Invalid token")
 
     return user_response.user
+
+
+@app.post("/addScore")
+async def add_score(payload: ScorePayload, request: Request):
+    try:
+        auth_header = request.headers.get("authorization")
+        if not auth_header or not auth_header.startswith("Bearer "):
+            raise HTTPException(status_code=401, detail="Missing or invalid Authorization header")
+
+        token = auth_header.replace("Bearer ", "")
+        user_response = supabase.auth.get_user(token)
+
+        if user_response.user is None:
+            raise HTTPException(status_code=401, detail="Invalid token")
+
+        user_id = user_response.user.id
+        print("Auth user_id:", user_id)
+
+        user_data_response = supabase.table("users").select("total_score").eq("id", user_id).single().execute()
+        user_data = user_data_response.data
+        print("User data:", user_data)
+
+        current_score = user_data.get("total_score", 0) or 0
+        new_score = current_score + payload.score
+
+        update_response = supabase.table("users").update({"total_score": new_score}).eq("id", user_id).execute()
+        print("Update response:", update_response)
+
+        return {"message": "Score updated", "new_score": new_score}
+    
+    except Exception as e:
+        print("🔥 Exception occurred:", e)
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Server error: {str(e)}")
+
