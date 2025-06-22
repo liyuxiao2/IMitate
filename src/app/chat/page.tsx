@@ -584,7 +584,7 @@ export default function ChatBot() {
                   <p className="text-lg text-gray-600">Your Score</p>
                   <p className="text-7xl font-bold text-[#7a003c]">
                     {evaluationScore}
-                    <span className="text-4xl text-gray-500">/45</span>
+                    <span className="text-4xl text-gray-500">/50</span>
                   </p>
                 </div>
               )}

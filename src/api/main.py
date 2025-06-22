@@ -63,7 +63,7 @@ class ProfilePictureUpdate(BaseModel):
 class LeaderboardEntry(BaseModel):
     username: str
     total_score: int
-    profile_picture_url: str | None
+    profile_picture_url: str 
 
 @app.post("/chat")
 async def chat_endpoint(request: ChatRequest):
@@ -137,7 +137,7 @@ async def evaluate_performance(request: EvaluationRequest):
     and a defined rubric.
     """
     evaluation_rubric = """
-    Scoring System (Total 45 pts):
+    Scoring System (Total 50 pts):
     - Correct Diagnosis: 25 pts (Is the submitted diagnosis correct?)
     - OLDCARTS Mnemonic: 12 pts (1.5 pts for each component: Onset, Location, Duration, Character, Aggravating/Alleviating factors, Radiation, Temporal pattern, Severity)
     - Associated Symptom Questions: 5 pts (Did they ask about relevant positive/negative symptoms?)
@@ -171,7 +171,7 @@ async def evaluate_performance(request: EvaluationRequest):
     Please evaluate the student's performance by analyzing the chat transcript. Provide a score for each category in the rubric and brief, constructive feedback explaining your reasoning for the score. Your response must be in a structured format.
 
     **VERY IMPORTANT:** Your final response MUST begin with the total score as a single integer on the very first line, followed by a newline character. For example:
-    45
+    50
     
     **Correct Diagnosis: 25/25**
     The student correctly identified the condition...
@@ -230,6 +230,12 @@ async def get_user(request: Request):
 async def add_score(payload: ScorePayload, request: Request):
     try:
         auth_header = request.headers.get("authorization")
+        if not auth_header or not auth_header.startswith("Bearer "):
+            raise HTTPException(status_code=401, detail="Missing or invalid Authorization header")
+
+        token = auth_header.replace("Bearer ", "")
+        user_response = supabase.auth.get_user(token)
+
         if user_response.user is None:
             raise HTTPException(status_code=401, detail="Invalid token")
 
@@ -251,7 +257,7 @@ async def add_score(payload: ScorePayload, request: Request):
     except Exception as e:
         print("🔥 Exception occurred:", e)
         traceback.print_exc()
-        raise HTTPException(status_code=500, detail=f"Server error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Server error: {str(e)}") 
         
         
 @app.get("/getLeaderboard")
