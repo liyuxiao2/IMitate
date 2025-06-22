@@ -1,16 +1,27 @@
-# Ignore frontend files for Railway deployment
+# Frontend files to ignore
 node_modules/
 .next/
 .vercel/
 src/app/
 src/components/
-src/lib/
+src/lib/supabaseClient.ts
+src/lib/utils.ts
+src/lib/profileUtils.ts
+src/types/
 public/
-*.json
-*.js
-*.ts
-*.tsx
+*.md
+package*.json
+tsconfig.json
+next.config.ts
+postcss.config.mjs
+eslint.config.mjs
+components.json
+tailwind.config.ts
+
+# Keep backend files
 !src/api/
 !requirements.txt
 !Procfile
-!railway.json 
+!railway.json
+!nixpacks.toml
+!.env* 
