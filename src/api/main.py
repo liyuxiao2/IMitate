@@ -6,9 +6,7 @@ import os
 from dotenv import load_dotenv
 import traceback
 from typing import List
-import sqlite3
-import random
-from .data.database import get_random_patient
+from .data.database import get_random_patient, debug_db
 # Load environment variables
 load_dotenv()
 
@@ -428,3 +426,8 @@ async def fetch_history(request: Request):
         print("🔥 Error fetching history:", e)
         traceback.print_exc()
         raise HTTPException(status_code=500, detail="An internal server error occurred.")
+
+@app.get("/debug-db")
+async def debug_db_endpoint():
+    # Call your helper and return its result as JSON
+    return debug_db()

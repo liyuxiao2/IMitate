@@ -1,12 +1,12 @@
 import sqlite3
 import os
 
-DATABASE_PATH = "src/api/data/patient_data.db"
  
 
 # Get the directory of the current script
 _dir = os.path.dirname(os.path.abspath(__file__))
 DATABASE_PATH = os.path.join(_dir, "patient_data.db")
+
 SQL_SCRIPT_PATH = os.path.join(_dir, "data.sql")
 
 
@@ -30,6 +30,7 @@ def init_database():
     
 def get_random_patient():
     """Get one random patient from the database"""
+    print(DATABASE_PATH)
     conn = sqlite3.connect(DATABASE_PATH)
     cursor = conn.cursor()
     
@@ -38,6 +39,23 @@ def get_random_patient():
     
     conn.close()
     return patient  # returns a tuple or None
+
+
+async def debug_db_endpoint():
+    exists = os.path.exists(DATABASE_PATH)
+    tables = []
+    if exists:
+        conn = sqlite3.connect(DATABASE_PATH)
+        rows = conn.execute(
+            "SELECT name FROM sqlite_master WHERE type='table';"
+        ).fetchall()
+        conn.close()
+        tables = [r[0] for r in rows]
+    return {
+        "path": DATABASE_PATH,
+        "exists": exists,
+        "tables": tables
+    }
 
 # This allows running `python -m src.api.database` to reset the db
 if __name__ == "__main__":
