@@ -6,8 +6,6 @@ import os
 from dotenv import load_dotenv
 import traceback
 from typing import List
-import sqlite3
-import random
 from .data.database import get_random_patient, debug_db
 # Load environment variables
 load_dotenv()
