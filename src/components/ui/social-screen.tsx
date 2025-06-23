@@ -87,13 +87,13 @@ export default function SocialScreen() {
       <div className="flex-1 p-12">
         <div className="max-w-5xl mx-auto">
           <h1 className="text-5xl font-bold text-[#5d002e] mb-2">Social</h1>
-          <p className="text-xl text-gray-600 mb-12">Global Leaderboard</p>
+          <p className="text-xl text-gray-600 mb-12">Monthly Global Leaderboard</p>
 
           {/* Top 3 Users */}
           <div className="flex justify-center items-end gap-8 mb-16 h-80">
             {/* 2nd Place */}
             {top3.length > 1 && (
-              <div className="text-center">
+              <div className="flex flex-col items-center justify-center text-center">
                 <Avatar className="w-32 h-32 border-8 border-gray-400">
                   <AvatarImage src={top3[1].profile_picture_url} />
                   <AvatarFallback>
@@ -141,7 +141,7 @@ export default function SocialScreen() {
             )}
             {/* 3rd Place */}
             {top3.length > 2 && (
-              <div className="text-center">
+              <div className="flex flex-col items-center text-center">
                 <Avatar className="w-32 h-32 border-8 border-yellow-600">
                   <AvatarImage src={top3[2].profile_picture_url} />
                   <AvatarFallback>
