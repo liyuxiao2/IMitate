@@ -46,8 +46,8 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # <-- your exact front-end URL
     allow_credentials=True,
-    allow_methods=["GET", "POST", "OPTIONS"],  # or ["*"]
-    allow_headers=["Authorization", "Content-Type"],  # or ["*"]
+    allow_methods=["*"],  # or ["*"]
+    allow_headers=["*"],  # or ["*"]
 )
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
