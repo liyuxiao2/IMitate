@@ -1,18 +1,19 @@
-"use client"
+"use client";
 
-import { useRouter } from "next/navigation"
+import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 export default function Navigation() {
-  const navItems = ["Career"]
+  const navItems = ["Career"];
 
-  const router = useRouter()
+  const router = useRouter();
 
   const handleRedirect = (name: string) => {
-    router.push("/" + name)
-  }
+    router.push("/" + name);
+  };
   const handleProfileRedirect = () => {
-    router.push("/Profile")
-  }
+    router.push("/Profile");
+  };
   return (
     <nav className="bg-mcmaster-maroon shadow-lg relative z-40">
       <div className=" mx-auto px-4 sm:px-6 lg:px-8">
@@ -40,14 +41,16 @@ export default function Navigation() {
             >
               👤
             </button>
-            <img
+            <Image
               src="/IMlogo.png"
               alt="Logo"
+              width={40}
+              height={40}
               className="w-10 h-10 rounded-full object-contain"
             />
           </div>
         </div>
       </div>
     </nav>
-  )
+  );
 }

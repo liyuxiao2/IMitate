@@ -6,21 +6,39 @@ import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { User, Bot, Send, Mic, MicOff, X } from "lucide-react";
+import { Bot, User, Send, Mic, MicOff, X } from "lucide-react";
 import ReactMarkdown from "react-markdown";
-import startSpeechRecognition from "./voice";
 import Sidebar from "@/components/ui/sidebar";
-import { loadPatient, Patient } from "./loadPatient";
-import CountdownTimer from "@/components/ui/timer";
-
 import Header from "@/components/ui/header";
+import CountdownTimer from "@/components/ui/timer";
+import { loadPatient } from "./loadPatient";
 import { supabase } from "@/lib/supabaseClient";
+import startSpeechRecognition from "./voice";
+import { apiEndpoints } from "@/lib/apiConfig";
 
 interface Message {
   id: string;
   type: "user" | "bot";
   content: string;
   timestamp: Date;
+}
+
+interface Patient {
+  id: string;
+  first_name: string;
+  last_name: string;
+  age: number;
+  sex: string;
+  pronouns: string;
+  height_cm: number;
+  weight_kg: number;
+  temp_c: number;
+  heart_rate_bpm: number;
+  primary_complaint: string;
+  personality: string;
+  symptoms: string;
+  medical_history: string;
+  correct_diagnosis: string;
 }
 
 export default function ChatBot() {
@@ -60,7 +78,6 @@ export default function ChatBot() {
       setMessages,
       setIsIntroModalOpen,
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -68,11 +85,10 @@ export default function ChatBot() {
   }, [messages]);
 
   useEffect(() => {
-  if (evaluationResult !== null) {
-    console.log("Eval Result updated:", evaluationResult);
-  }
-}, [evaluationResult]);
-
+    if (evaluationResult !== null) {
+      console.log("Eval Result updated:", evaluationResult);
+    }
+  }, [evaluationResult]);
 
   const addMessage = (type: "user" | "bot", content: string) => {
     const newMessage: Message = {
@@ -86,7 +102,7 @@ export default function ChatBot() {
 
   const fetchGeminiResponse = async (userInput: string): Promise<string> => {
     try {
-      const res = await fetch("http://localhost:8000/chat", {
+      const res = await fetch(apiEndpoints.chat, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prompt: userInput }),
@@ -103,24 +119,21 @@ export default function ChatBot() {
   };
 
   const handleMicClick = async () => {
-    if (isListening) return; // Already listening, block further clicks
-
-    setIsListening(true); // 🔴 Show mic is on immediately
-
-    try {
-      const transcript = await startSpeechRecognition(
-        () => console.log("Speech started"),
-        () => {
-          console.log("Speech ended");
-          setIsListening(false); // 🔵 Show mic is off when done
+    if (!isListening) {
+      setIsListening(true);
+      try {
+        const transcript = await startSpeechRecognition(
+          () => console.log("Speech started"),
+          () => setIsListening(false)
+        );
+        if (transcript.trim()) {
+          setInput(transcript);
         }
-      );
-
-      if (transcript.trim()) {
-        setInput(transcript); // 💬 Put transcript into input box
+      } catch (err) {
+        console.error("Error with speech recognition:", err);
         setIsListening(false);
       }
-    } catch (error) {
+    } else {
       setIsListening(false);
     }
   };
@@ -185,15 +198,11 @@ export default function ChatBot() {
     });
   };
 
-  async function handleSubmitDiagnosis(
-      score: number,
-      feedbackText: string
-    ) {
-      const token = (await supabase.auth.getSession())
-        .data.session?.access_token;
+  async function handleSubmitDiagnosis(score: number, feedbackText: string) {
+    const token = (await supabase.auth.getSession()).data.session?.access_token;
 
     try {
-      const res = await fetch("http://localhost:8000/addScore", {
+      const res = await fetch(apiEndpoints.addScore, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -212,30 +221,28 @@ export default function ChatBot() {
       console.error("Error adding score:", err);
     }
 
-    
-
     try {
       console.log("Eval Result", evaluationResult);
-      const res = await fetch("http://localhost:8000/addMatch", {
+      const res = await fetch(apiEndpoints.addMatch, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          patient_info: patient,               // object (dictionary)
+          patient_info: patient, // object (dictionary)
           submitted_diagnosis: diagnosisInput, // string
           submitted_aftercare: aftercareInput, // string
-          score: score,                         // number
-          feedback: feedbackText ?? "No History Saved"
-        })
+          score: score, // number
+          feedback: feedbackText ?? "No History Saved",
+        }),
       });
       const result = await res.json();
       console.log("Score updated successfully:", result);
     } catch (err) {
       console.error("Error adding match:", err);
     }
-  };
+  }
 
   return (
     <div className="flex h-screen bg-stone-200 font-sans">
@@ -332,7 +339,7 @@ export default function ChatBot() {
 
                 try {
                   console.log("Submitting for evaluation...", evaluationData);
-                  const res = await fetch("http://localhost:8000/evaluate", {
+                  const res = await fetch(apiEndpoints.evaluate, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(evaluationData),
@@ -346,7 +353,7 @@ export default function ChatBot() {
 
                   const feedbackText = result.evaluation;
                   const score = result.score;
-                  
+
                   setEvaluationResult(feedbackText);
                   setEvaluationScore(score);
 

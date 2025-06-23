@@ -4,13 +4,35 @@ from fastapi.middleware.cors import CORSMiddleware
 import httpx
 import os
 from dotenv import load_dotenv
-from .data.database import get_random_patient
 import traceback
-from .supabase.supabase_client import supabase, supabase_admin
-from uuid import UUID
 from typing import List
-
+import sqlite3
+import random
+from .data.database import get_random_patient
+# Load environment variables
 load_dotenv()
+
+# Supabase configuration (embedded to avoid import issues)
+from supabase import create_client, Client
+
+# Try both frontend and backend environment variable names
+SUPABASE_URL = os.getenv("SUPABASE_URL") 
+SUPABASE_KEY = os.getenv("SUPABASE_ANON_KEY")
+SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY")
+
+if not SUPABASE_URL:
+    raise ValueError("Missing Supabase URL environment variable. Set SUPABASE_URL.")
+if not SUPABASE_KEY:
+    raise ValueError("Missing Supabase Anon Key environment variable. Set SUPABASE_ANON_KEY.")
+if not SUPABASE_SERVICE_KEY:
+    raise ValueError("Missing Supabase Service Key environment variable. Set SUPABASE_SERVICE_KEY.")
+
+# Client for frontend-like access (auth, anon RLS)
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+# Admin client that bypasses RLS (for trusted server-side operations)
+supabase_admin: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+
 
 app = FastAPI()
 
@@ -163,17 +185,19 @@ async def evaluate_performance(request: EvaluationRequest):
     """
     evaluation_rubric = """
     Scoring System (Total 50 pts):
+    - Correct Diagnosis: 25 pts (Is the submitted diagnosis correct? If yes award 25 pts, if no overlap award 0 pts, partial points if partial overlap)
+    Scoring System (Total 50 pts):
     - Correct Diagnosis: 25 pts (Is the submitted diagnosis correct?)
     - OLDCARTS Mnemonic: 12 pts (1.5 pts for each component: Onset, Location, Duration, Character, Aggravating/Alleviating factors, Radiation, Temporal pattern, Severity)
-    - Associated Symptom Questions: 5 pts (Did they ask about relevant positive/negative symptoms?)
+    - Differential Diagnoses: 5 pts (Did the student consider other plausible diagnoses?)
     - History Gathering: 4 pts (Did they ask about relevant medical, family, or social history?)
     - Logical, Focused Reasoning: 2 pts (Was the questioning logical and not random?)
     - Timing Bonus: 2 pts (Deduct 0.5 pts per minute over 5 minutes, max deduction at 9 minutes)
+    If a category is not applicable, award full points for that category.
     """
 
     prompt = f"""
-    You are an expert medical education evaluator. Your task is to analyze a simulated patient encounter and score the medical student's performance based on the provided data and a strict rubric.
-    Address the student as "you" in the first person.
+    You are an expert medical education evaluator. Your task is to analyze a simulated patient encounter and score the medical student's performance based on the provided data and a strict rubric. Do not pamper the student, be objective.
 
     **1. Full Patient Case:**
     ```json

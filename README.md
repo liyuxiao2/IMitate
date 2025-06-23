@@ -1,73 +1,105 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+<h1>🧠 IMitate – AI-Powered Medical Education Assistant</h1>
 
-## Getting Started
+<p><strong>IMitate</strong> is a voice-enabled medical chatbot that simulates virtual patient interactions. Designed for medical students, it offers a realistic, AI-driven environment to practice clinical reasoning, interviewing, and diagnostic skills.</p>
 
-First, run the development server:
+<hr />
 
-```bash
-npm run dev
+<h2>🚀 Getting Started</h2>
+
+<p>This is a <a href="https://nextjs.org" target="_blank">Next.js</a> project for the frontend, with a <a href="https://fastapi.tiangolo.com" target="_blank">FastAPI</a> backend and <a href="https://deepmind.google/technologies/gemini" target="_blank">Google Gemini</a> LLM integration.</p>
+
+<h3>1. Clone the repository</h3>
+<pre><code>git clone https://github.com/your-username/imitate.git
+cd imitate
+</code></pre>
+
+<h3>2. Install dependencies</h3>
+<pre><code>npm install
 # or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+yarn install
+</code></pre>
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+<h3>3. Start the development server</h3>
+<pre><code>npm run dev</code></pre>
+<p>Visit <a href="http://localhost:3000" target="_blank">http://localhost:3000</a> to view the app.</p>
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+<h3>4. Run the backend (FastAPI)</h3>
+<pre><code>cd backend
+uvicorn src.api.main:app --reload
+</code></pre>
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+<p>Make sure to set your environment variable for the Gemini API key in <code>.env</code>:</p>
+<pre><code>GEMINI_API_KEY=your-key-here</code></pre>
 
-## Learn More
+<hr />
 
-To learn more about Next.js, take a look at the following resources:
+<h2>🛠️ Tech Stack</h2>
+<ul>
+  <li><strong>Frontend</strong>: Next.js 14, TypeScript, Tailwind CSS, shadcn/ui</li>
+  <li><strong>Backend</strong>: FastAPI (Python)</li>
+  <li><strong>Database</strong>: SQLite (seeded with patient data)</li>
+  <li><strong>LLM</strong>: Google Gemini API</li>
+  <li><strong>Voice Input</strong>: react-speech-recognition</li>
+</ul>
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+<hr />
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+<h2>✨ Features</h2>
+<ul>
+  <li>🔄 Dynamic chatbot powered by LLM</li>
+  <li>🎙️ Voice-to-text interaction</li>
+  <li>🩺 Simulated patients with realistic personalities, symptoms, and medical history</li>
+  <li>📚 Structured prompt generation with personality-guided dialogue</li>
+  <li>🧠 Clinical reasoning support for early-stage medical learners</li>
+</ul>
 
-## Deploy on Vercel
+<hr />
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+<h2>🧩 Project Structure</h2>
+<pre><code>
+imitate/
+├── app/                  # Next.js frontend
+├── backend/              # FastAPI backend
+│   ├── src/api/          # API routes and logic
+│   ├── database.py       # SQLite access
+│   └── .env              # API key and config
+├── public/               # Static files
+├── README.md
+└── package.json
+</code></pre>
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+<hr />
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+<h2>🧪 Sample Prompt</h2>
+<pre><code>
+You are a patient simulator for a medical student. Respond in first person based on the provided details.
 
-## Getting Started
+--- PATIENT DETAILS ---
+Name: Alice Kim
+Age: 34
+Primary Complaint: Severe headache
+Symptoms: Throbbing pain, nausea, sensitivity to light
+Personality: Quiet and observant
+Medical History: Occasional migraines
+--- END DETAILS ---
 
-First, run the development server:
+Medical Student's Question: "How long have you had this headache?"
+</code></pre>
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+<hr />
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+<h2>📦 Deploy on Vercel</h2>
+<p>You can deploy the frontend on <a href="https://vercel.com/new" target="_blank">Vercel</a>, and use <a href="https://render.com" target="_blank">Render</a>, Railway, or Fly.io to host your FastAPI backend.</p>
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+<hr />
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+<h2>🤝 Contributors</h2>
+<ul>
+  <li><a href="https://github.com/your-username" target="_blank">Your Name</a></li>
+  <li>More teammates here</li>
+</ul>
 
-## Learn More
+<hr />
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+<h2>📜 License</h2>
+<p>This project is licensed under the MIT License.</p>

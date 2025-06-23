@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { User, Edit, Upload, Camera, Check, X } from "lucide-react";
+import { User, Edit, Camera, Check, X } from "lucide-react";
 import Sidebar from "@/components/ui/sidebar";
 import Header from "@/components/ui/header";
 

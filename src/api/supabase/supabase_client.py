@@ -3,20 +3,20 @@ from supabase import create_client, Client
 from dotenv import load_dotenv
 import os
 
-# Load the .env.local file if it exists, otherwise .env
-env_path = ".env.local" if os.path.exists(".env.local") else ".env"
-load_dotenv(env_path)
+# Load environment variables
+load_dotenv()
 
-SUPABASE_URL = os.getenv("NEXT_PUBLIC_SUPABASE_URL")
-SUPABASE_KEY = os.getenv("NEXT_PUBLIC_SUPABASE_ANON_KEY")
+# Try both frontend and backend environment variable names
+SUPABASE_URL = os.getenv("SUPABASE_URL") or os.getenv("NEXT_PUBLIC_SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_ANON_KEY") or os.getenv("NEXT_PUBLIC_SUPABASE_ANON_KEY")
 SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY")
 
 if not SUPABASE_URL:
-    raise ValueError("Missing Supabase URL environment variable.")
+    raise ValueError("Missing Supabase URL environment variable. Set SUPABASE_URL.")
 if not SUPABASE_KEY:
-    raise ValueError("Missing Supabase Anon Key environment variable.")
+    raise ValueError("Missing Supabase Anon Key environment variable. Set SUPABASE_ANON_KEY.")
 if not SUPABASE_SERVICE_KEY:
-    raise ValueError("Missing Supabase Service Key environment variable.")
+    raise ValueError("Missing Supabase Service Key environment variable. Set SUPABASE_SERVICE_KEY.")
 
 # Client for frontend-like access (auth, anon RLS)
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)

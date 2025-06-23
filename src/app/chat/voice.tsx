@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 // Type declarations for Speech Recognition API
 interface ISpeechRecognition extends EventTarget {
@@ -7,10 +7,14 @@ interface ISpeechRecognition extends EventTarget {
   lang: string;
   start(): void;
   stop(): void;
-  onstart: ((this: ISpeechRecognition, ev: Event) => any) | null;
-  onresult: ((this: ISpeechRecognition, ev: ISpeechRecognitionEvent) => any) | null;
-  onend: ((this: ISpeechRecognition, ev: Event) => any) | null;
-  onerror: ((this: ISpeechRecognition, ev: ISpeechRecognitionErrorEvent) => any) | null;
+  onstart: ((this: ISpeechRecognition, ev: Event) => void) | null;
+  onresult:
+    | ((this: ISpeechRecognition, ev: ISpeechRecognitionEvent) => void)
+    | null;
+  onend: ((this: ISpeechRecognition, ev: Event) => void) | null;
+  onerror:
+    | ((this: ISpeechRecognition, ev: ISpeechRecognitionErrorEvent) => void)
+    | null;
 }
 
 interface ISpeechRecognitionEvent extends Event {
@@ -23,7 +27,7 @@ interface ISpeechRecognitionErrorEvent extends Event {
 }
 
 interface ISpeechRecognitionConstructor {
-  new(): ISpeechRecognition;
+  new (): ISpeechRecognition;
 }
 
 declare global {
@@ -38,23 +42,27 @@ export default function startSpeechRecognition(
   onStop?: () => void
 ): Promise<string> {
   return new Promise((resolve, reject) => {
-    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-      reject(new Error('Speech recognition not supported in this browser'));
+    if (
+      !("webkitSpeechRecognition" in window) &&
+      !("SpeechRecognition" in window)
+    ) {
+      reject(new Error("Speech recognition not supported in this browser"));
       return;
     }
 
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
     const recognition = new SpeechRecognition();
 
-    let finalTranscript = '';
+    let finalTranscript = "";
     let silenceTimeout: ReturnType<typeof setTimeout> | null = null;
 
     recognition.continuous = true; // allow continuous input
     recognition.interimResults = true;
-    recognition.lang = 'en-US';
+    recognition.lang = "en-US";
 
     recognition.onstart = () => {
-      console.log('Speech recognition started');
+      console.log("Speech recognition started");
       if (onStart) onStart();
     };
 
@@ -62,26 +70,26 @@ export default function startSpeechRecognition(
       // Reset silence timer
       if (silenceTimeout) clearTimeout(silenceTimeout);
       silenceTimeout = setTimeout(() => {
-        console.log('1 second of silence detected — stopping recognition');
+        console.log("1 second of silence detected — stopping recognition");
         recognition.stop();
       }, 1000);
 
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const transcript = event.results[i][0].transcript;
         if (event.results[i].isFinal) {
-          finalTranscript += transcript + ' ';
+          finalTranscript += transcript + " ";
         }
       }
     };
 
     recognition.onend = () => {
-      console.log('Speech recognition ended');
+      console.log("Speech recognition ended");
       if (onStop) onStop();
       resolve(finalTranscript.trim());
     };
 
     recognition.onerror = (event) => {
-      console.warn('Speech recognition error:', event.error);
+      console.warn("Speech recognition error:", event.error);
       if (onStop) onStop();
       reject(new Error(`Speech recognition error: ${event.error}`));
     };

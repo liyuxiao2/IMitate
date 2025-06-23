@@ -1,4 +1,5 @@
 import { supabase } from './supabaseClient';
+import { apiEndpoints } from './apiConfig';
 
 export interface ProfilePictureUploadResult {
   success: boolean;
@@ -34,7 +35,7 @@ export async function uploadProfilePicture(file: File, userId: string): Promise<
     const fileExt = file.name.split('.').pop();
     const fileName = `${userId}/profile.${fileExt}`;
     
-    const { data: uploadData, error: uploadError } = await supabase.storage
+    const { error: uploadError } = await supabase.storage
       .from('profile-pictures')
       .upload(fileName, file, {
         upsert: true
@@ -73,7 +74,7 @@ export async function uploadProfilePicture(file: File, userId: string): Promise<
  */
 export async function updateProfilePictureUrl(profilePictureUrl: string, accessToken: string): Promise<boolean> {
   try {
-    const response = await fetch("http://localhost:8000/updateProfilePicture", {
+    const response = await fetch(apiEndpoints.updateProfilePicture, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

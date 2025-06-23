@@ -1,34 +1,20 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 interface CountdownTimerProps {
   seconds: number;
   onTimeout: () => void;
 }
 
-export default function CountdownTimer({ seconds, onTimeout }: CountdownTimerProps) {
+export default function CountdownTimer({
+  seconds,
+  onTimeout,
+}: CountdownTimerProps) {
   const [timeLeft, setTimeLeft] = useState(seconds);
 
-  useEffect(() => {
-    if (timeLeft === 0) {
-      onTimeout(); // Only call once!
-      return;
-    }
+  // Memoize the onTimeout callback to prevent unnecessary re-renders
+  const memoizedOnTimeout = useCallback(onTimeout, [onTimeout]);
 
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [timeLeft]); // ❗ Problem: This was likely causing repeated calls
-
-  // ❌ BAD: don't use [timeLeft] above if you're updating time inside!
-  // ✅ Instead, separate useEffect to only run once:
+  // Single timer effect that runs once
   useEffect(() => {
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
@@ -41,14 +27,14 @@ export default function CountdownTimer({ seconds, onTimeout }: CountdownTimerPro
     }, 1000);
 
     return () => clearInterval(timer);
-  }, []); // ← run only once
+  }, []);
 
   // Trigger timeout when hitting zero
   useEffect(() => {
     if (timeLeft === 0) {
-      onTimeout(); // ✅ call timeout only once
+      memoizedOnTimeout();
     }
-  }, [timeLeft, onTimeout]);
+  }, [timeLeft, memoizedOnTimeout]);
 
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60)
@@ -58,10 +44,9 @@ export default function CountdownTimer({ seconds, onTimeout }: CountdownTimerPro
     return `${m}:${s}`;
   };
 
-
   return (
     <div
-      className={`bg-stone-100 w-full py-4 px-6 rounded-md text-center text-sm font-mono mb-4 shadow-sm" ${
+      className={`bg-stone-100 w-full py-4 px-6 rounded-md text-center text-sm font-mono mb-4 shadow-sm ${
         timeLeft === 0 ? "text-red-600" : "text-gray-600"
       }`}
     >

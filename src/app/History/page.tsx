@@ -7,11 +7,16 @@ import Sidebar from "@/components/ui/sidebar";
 import Header from "@/components/ui/header";
 import { supabase } from "@/lib/supabaseClient";
 import { Button } from "@/components/ui/button";
+import { API_BASE_URL } from "@/lib/apiConfig";
 
 interface HistoryEntry {
   id: number;
   user_id: string;
-  patient_info: { first_name: string; last_name: string; [key: string]: any };
+  patient_info: {
+    first_name: string;
+    last_name: string;
+    [key: string]: unknown;
+  };
   score: number;
   submitted_diagnosis: string;
   feedback: string;
@@ -43,7 +48,7 @@ export default function HistoryPage() {
         return;
       }
       try {
-        const res = await fetch("http://localhost:8000/fetchHistory", {
+        const res = await fetch(`${API_BASE_URL}/fetchHistory`, {
           method: "GET",
           headers: { Authorization: `Bearer ${session.access_token}` },
         });
@@ -87,18 +92,12 @@ export default function HistoryPage() {
             <table className="min-w-full">
               <thead className="bg-mcmaster-maroon text-white">
                 <tr>
-                  <th className="py-4 px-8 text-left font-semibold">
-                    Patient
-                  </th>
+                  <th className="py-4 px-8 text-left font-semibold">Patient</th>
                   <th className="py-4 px-8 text-left font-semibold">
                     Diagnosis
                   </th>
-                  <th className="py-4 px-8 text-left font-semibold">
-                    Score
-                  </th>
-                  <th className="py-4 px-8 text-left font-semibold">
-                    Date
-                  </th>
+                  <th className="py-4 px-8 text-left font-semibold">Score</th>
+                  <th className="py-4 px-8 text-left font-semibold">Date</th>
                   <th className="py-4 px-8"></th>
                 </tr>
               </thead>
