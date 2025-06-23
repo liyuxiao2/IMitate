@@ -88,15 +88,13 @@ Medical Student's Question: "How long have you had this headache?"
 
 <hr />
 
-<h2>📦 Deploy on Vercel</h2>
-<p>You can deploy the frontend on <a href="https://vercel.com/new" target="_blank">Vercel</a>, and use <a href="https://render.com" target="_blank">Render</a>, Railway, or Fly.io to host your FastAPI backend.</p>
 
 <hr />
 
 <h2>🤝 Contributors</h2>
 <ul>
-  <li><a href="https://github.com/your-username" target="_blank">Your Name</a></li>
-  <li>More teammates here</li>
+  <li><a href="https://github.com/liyuxiao2" target="_blank">Liyu Xiao</a></li>
+  <li>Jeff Guo, Arian Emamjomeh, Chris Zhu</li>
 </ul>
 
 <hr />
