@@ -39,6 +39,22 @@ def get_random_patient():
     conn.close()
     return patient  # returns a tuple or None
 
+
+async def debug_db():
+    exists = os.path.exists(DATABASE_PATH)
+    tables = []
+    if exists:
+        conn = sqlite3.connect(DATABASE_PATH)
+        tables = conn.execute(
+            "SELECT name FROM sqlite_master WHERE type='table';"
+        ).fetchall()
+        conn.close()
+    return {
+        "path": DATABASE_PATH,
+        "exists": exists,
+        "tables": [t[0] for t in tables]
+    }
+
 # This allows running `python -m src.api.database` to reset the db
 if __name__ == "__main__":
     init_database() 

@@ -54,6 +54,7 @@ export async function loadPatient({
   setAftercareInput("");
 
   try {
+    console.log("Fetching patient from:", apiEndpoints.getRandomPatient);
     const res = await fetch(apiEndpoints.getRandomPatient);
     console.log("Fetch completed with status", res.status);
     const data = await res.json();
