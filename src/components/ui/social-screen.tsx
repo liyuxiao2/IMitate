@@ -54,7 +54,7 @@ export default function SocialScreen() {
         (payload) => {
           console.log("Change received!", payload);
           fetchLeaderboard(); // Refetch data when a change occurs
-        }
+        },
       )
       .subscribe();
 
@@ -87,7 +87,9 @@ export default function SocialScreen() {
       <div className="flex-1 p-12">
         <div className="max-w-5xl mx-auto">
           <h1 className="text-5xl font-bold text-[#5d002e] mb-2">Social</h1>
-          <p className="text-xl text-gray-600 mb-12">Monthly Global Leaderboard</p>
+          <p className="text-xl text-gray-600 mb-12">
+            Monthly Global Leaderboard
+          </p>
 
           {/* Top 3 Users */}
           <div className="flex justify-center items-end gap-8 mb-16 h-80">

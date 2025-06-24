@@ -32,7 +32,7 @@ interface LoadPatientParams {
       type: "user" | "bot";
       content: string;
       timestamp: Date;
-    }>
+    }>,
   ) => void;
   setIsIntroModalOpen: (b: boolean) => void;
 }

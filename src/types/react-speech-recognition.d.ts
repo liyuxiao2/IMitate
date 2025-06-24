@@ -10,7 +10,10 @@ declare module "react-speech-recognition" {
   };
 
   const SpeechRecognition: {
-    startListening: (options?: { continuous?: boolean; language?: string }) => void;
+    startListening: (options?: {
+      continuous?: boolean;
+      language?: string;
+    }) => void;
     stopListening: () => void;
     abortListening: () => void;
     browserSupportsSpeechRecognition: () => boolean;

@@ -8,7 +8,7 @@ import { supabase } from "@/lib/supabaseClient";
 
 export default function Header() {
   const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(
-    null
+    null,
   );
 
   useEffect(() => {

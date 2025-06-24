@@ -39,7 +39,7 @@ declare global {
 
 export default function startSpeechRecognition(
   onStart?: () => void,
-  onStop?: () => void
+  onStop?: () => void,
 ): Promise<string> {
   return new Promise((resolve, reject) => {
     if (
