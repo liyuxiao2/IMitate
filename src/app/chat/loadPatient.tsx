@@ -1,5 +1,6 @@
 // loadPatient.ts
 import { apiEndpoints } from "@/lib/apiConfig";
+import { supabase } from "@/lib/supabaseClient";
 
 export interface Patient {
   id: string;
@@ -55,7 +56,12 @@ export async function loadPatient({
 
   try {
     console.log("Fetching patient from:", apiEndpoints.getRandomPatient);
-    const res = await fetch(apiEndpoints.getRandomPatient);
+    const token = (await supabase.auth.getSession()).data.session?.access_token;
+    const res = await fetch(apiEndpoints.getRandomPatient, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
     console.log("Fetch completed with status", res.status);
     const data = await res.json();
     console.log("Received data:", data);
