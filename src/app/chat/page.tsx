@@ -102,6 +102,8 @@ export default function ChatBot() {
 
   const fetchGeminiResponse = async (userInput: string): Promise<string> => {
     try {
+      console.log("➜  Calling chat at:", apiEndpoints.chat);
+
       const res = await fetch(apiEndpoints.chat, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

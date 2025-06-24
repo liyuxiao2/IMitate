@@ -39,10 +39,6 @@ supabase_admin: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 
 app = FastAPI()
 
-# # Initialize database on startup
-# @app.on_event("startup")
-# async def startup_event():
-#     init_database()
 
 # Allow frontend (adjust if needed)
 app.add_middleware(
