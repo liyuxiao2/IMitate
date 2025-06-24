@@ -435,16 +435,18 @@ async def get_random_patient_endpoint(request: Request):
     """
     Returns one random patient from Supabase, after verifying the caller's JWT.
     """
-    # 1) Extract and validate the Authorization header
     auth_header = request.headers.get("authorization")
     if not auth_header or not auth_header.startswith("Bearer "):
-        raise HTTPException(401, "Missing or invalid Authorization header")
+        raise HTTPException(
+            status_code=401,
+            detail="Missing or invalid Authorization header"
+        )
 
-    token = auth_header.split(" ", 1)[1]
-    user_resp = supabase.auth.get_user(token)
-    if user_resp.user is None:
-        raise HTTPException(401, "Invalid token")
-
+    token = auth_header.replace("Bearer ", "")
+    user_response = supabase.auth.get_user(token)
+    if user_response.user is None:
+        raise HTTPException(status_code=401, detail="Invalid token")
+    
     try:
         # 2) Count the total rows
         count_res = (
