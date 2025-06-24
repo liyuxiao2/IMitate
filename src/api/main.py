@@ -1,3 +1,4 @@
+import random
 from fastapi import FastAPI, Request, HTTPException
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
@@ -6,7 +7,7 @@ import os
 from dotenv import load_dotenv
 import traceback
 from typing import List
-from .data.database import get_random_patient, debug_db
+
 # Load environment variables
 load_dotenv()
 
@@ -14,16 +15,20 @@ load_dotenv()
 from supabase import create_client, Client
 
 # Try both frontend and backend environment variable names
-SUPABASE_URL = os.getenv("SUPABASE_URL") 
+SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_ANON_KEY")
 SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY")
 
 if not SUPABASE_URL:
     raise ValueError("Missing Supabase URL environment variable. Set SUPABASE_URL.")
 if not SUPABASE_KEY:
-    raise ValueError("Missing Supabase Anon Key environment variable. Set SUPABASE_ANON_KEY.")
+    raise ValueError(
+        "Missing Supabase Anon Key environment variable. Set SUPABASE_ANON_KEY."
+    )
 if not SUPABASE_SERVICE_KEY:
-    raise ValueError("Missing Supabase Service Key environment variable. Set SUPABASE_SERVICE_KEY.")
+    raise ValueError(
+        "Missing Supabase Service Key environment variable. Set SUPABASE_SERVICE_KEY."
+    )
 
 # Client for frontend-like access (auth, anon RLS)
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
@@ -49,8 +54,10 @@ app.add_middleware(
 )
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
+
 class ChatRequest(BaseModel):
     prompt: str
+
 
 class PatientData(BaseModel):
     id: str
@@ -65,37 +72,44 @@ class PatientData(BaseModel):
     medical_history: str
     correct_diagnosis: str
 
+
 class EvaluationRequest(BaseModel):
     patientData: PatientData
     chatHistory: str
     submittedDiagnosis: str
     submittedAftercare: str
-    
+
+
 class ScorePayload(BaseModel):
     score: int
 
 
 class ScoreUpdate(BaseModel):
-    uid: str    # matches users.id (UUID)
+    uid: str  # matches users.id (UUID)
     score: int  # amount to add
+
 
 class ProfilePictureUpdate(BaseModel):
     profile_picture_url: str
 
+
 class LeaderboardEntry(BaseModel):
     username: str
     total_score: int
-    profile_picture_url: str 
+    profile_picture_url: str
+
 
 class AddMatchPayload(BaseModel):
-    patient_info: dict   # use dict if you are directly passing a JSON object
+    patient_info: dict  # use dict if you are directly passing a JSON object
     score: int
     submitted_diagnosis: str
     submitted_aftercare: str
     feedback: str
-    
+
+
 class HistoryRequest(BaseModel):
     user_id: str
+
 
 class HistoryEntry(BaseModel):
     id: int
@@ -108,16 +122,16 @@ class HistoryEntry(BaseModel):
     created_at: str
 
 
-    
-
 @app.post("/chat")
 async def chat_endpoint(request: ChatRequest):
     gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={GEMINI_API_KEY}"
 
-    print(f"\\n--- Raw prompt received from frontend: ---\\n{request.prompt}\\n-----------------------------------------\\n")
+    print(
+        f"\\n--- Raw prompt received from frontend: ---\\n{request.prompt}\\n-----------------------------------------\\n"
+    )
 
     final_prompt_text = request.prompt
-    
+
     # Check if this is a patient simulation chat
     if "\n\nUser:" in request.prompt and "Patient Details:" in request.prompt:
         try:
@@ -137,19 +151,17 @@ async def chat_endpoint(request: ChatRequest):
             )
         except ValueError:
             # If split fails, just fall back to the original prompt
-            print(">>> PROMPT REFORMATTING FAILED: Separator not found. Using original prompt. <<<\n")
+            print(
+                ">>> PROMPT REFORMATTING FAILED: Separator not found. Using original prompt. <<<\n"
+            )
             pass
 
-    print(f"\\n--- Final prompt sent to Gemini: ---\\n{final_prompt_text}\\n-----------------------------------\\n")
+    print(
+        f"\\n--- Final prompt sent to Gemini: ---\\n{final_prompt_text}\\n-----------------------------------\\n"
+    )
 
     headers = {"Content-Type": "application/json"}
-    body = {
-        "contents": [
-            {
-                "parts": [{"text": final_prompt_text}]
-            }
-        ]
-    }
+    body = {"contents": [{"parts": [{"text": final_prompt_text}]}]}
 
     async with httpx.AsyncClient() as client:
         response = await client.post(gemini_url, json=body, headers=headers)
@@ -164,15 +176,6 @@ async def chat_endpoint(request: ChatRequest):
         print("⚠️ Failed to parse Gemini response:", e)
 
     return {"reply": reply or "Sorry, I couldn't generate a response."}
-
-
-@app.get("/patients/random")
-async def get_random_patient_endpoint():
-    """Get a single random patient from the database"""
-    patient = get_random_patient()
-    if patient:
-        return {"patient": patient}
-    return {"error": "No patients found in database"}
 
 
 @app.post("/evaluate")
@@ -226,9 +229,7 @@ async def evaluate_performance(request: EvaluationRequest):
 
     gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={GEMINI_API_KEY}"
     headers = {"Content-Type": "application/json"}
-    body = {
-        "contents": [{"parts": [{"text": prompt}]}]
-    }
+    body = {"contents": [{"parts": [{"text": prompt}]}]}
 
     async with httpx.AsyncClient() as client:
         response = await client.post(gemini_url, json=body, headers=headers)
@@ -236,9 +237,9 @@ async def evaluate_performance(request: EvaluationRequest):
 
     try:
         full_response_text = data["candidates"][0]["content"]["parts"][0]["text"]
-        
+
         # Split the response to separate the score from the detailed evaluation
-        response_parts = full_response_text.split('\n', 1)
+        response_parts = full_response_text.split("\n", 1)
         score_str = response_parts[0].strip()
         evaluation_text = response_parts[1].strip() if len(response_parts) > 1 else ""
 
@@ -246,9 +247,13 @@ async def evaluate_performance(request: EvaluationRequest):
         try:
             score = int(score_str)
         except (ValueError, IndexError):
-            print(f"⚠️ Could not parse score from response: '{score_str}'. Defaulting to 0.")
+            print(
+                f"⚠️ Could not parse score from response: '{score_str}'. Defaulting to 0."
+            )
             score = 0
-            evaluation_text = full_response_text # Keep the original text if score parsing fails
+            evaluation_text = (
+                full_response_text  # Keep the original text if score parsing fails
+            )
 
         return {"score": score, "evaluation": evaluation_text}
     except (KeyError, IndexError) as e:
@@ -261,7 +266,9 @@ async def get_user(request: Request):
     auth_header = request.headers.get("authorization")
 
     if not auth_header or not auth_header.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="Missing or invalid Authorization header")
+        raise HTTPException(
+            status_code=401, detail="Missing or invalid Authorization header"
+        )
 
     token = auth_header.replace("Bearer ", "")
     user_response = supabase.auth.get_user(token)
@@ -272,13 +279,14 @@ async def get_user(request: Request):
     return user_response.user
 
 
-
 @app.post("/addScore")
 async def add_score(payload: ScorePayload, request: Request):
     try:
         auth_header = request.headers.get("authorization")
         if not auth_header or not auth_header.startswith("Bearer "):
-            raise HTTPException(status_code=401, detail="Missing or invalid Authorization header")
+            raise HTTPException(
+                status_code=401, detail="Missing or invalid Authorization header"
+            )
 
         token = auth_header.replace("Bearer ", "")
         user_response = supabase.auth.get_user(token)
@@ -289,31 +297,47 @@ async def add_score(payload: ScorePayload, request: Request):
         user_id = user_response.user.id
         print("Auth user_id:", user_id)
 
-        user_data_response = supabase.table("users").select("total_score").eq("id", user_id).single().execute()
+        user_data_response = (
+            supabase.table("users")
+            .select("total_score")
+            .eq("id", user_id)
+            .single()
+            .execute()
+        )
         user_data = user_data_response.data
         print("User data:", user_data)
 
         current_score = user_data.get("total_score", 0) or 0
         new_score = current_score + payload.score
 
-        update_response = supabase.table("users").update({"total_score": new_score}).eq("id", user_id).execute()
+        update_response = (
+            supabase.table("users")
+            .update({"total_score": new_score})
+            .eq("id", user_id)
+            .execute()
+        )
         print("Update response:", update_response)
 
         return {"message": "Score updated", "new_score": new_score}
-    
+
     except Exception as e:
         print("🔥 Exception occurred:", e)
         traceback.print_exc()
-        raise HTTPException(status_code=500, detail=f"Server error: {str(e)}") 
-        
-        
+        raise HTTPException(status_code=500, detail=f"Server error: {str(e)}")
+
+
 @app.get("/getLeaderboard")
 async def get_leaderboard():
     """
     Get the global leaderboard sorted by total_score in descending order.
     Returns users with their username, total_score, and profile_picture_url.
     """
-    response = supabase_admin.table("users").select("username, total_score, profile_picture_url").order("total_score", desc=True).execute()
+    response = (
+        supabase_admin.table("users")
+        .select("username, total_score, profile_picture_url")
+        .order("total_score", desc=True)
+        .execute()
+    )
     print(response.data)
     return response.data
 
@@ -327,7 +351,9 @@ async def update_profile_picture(request: Request, body: ProfilePictureUpdate):
     try:
         auth_header = request.headers.get("authorization")
         if not auth_header or not auth_header.startswith("Bearer "):
-            raise HTTPException(status_code=401, detail="Missing or invalid Authorization header")
+            raise HTTPException(
+                status_code=401, detail="Missing or invalid Authorization header"
+            )
 
         token = auth_header.replace("Bearer ", "")
         user_response = supabase.auth.get_user(token)
@@ -338,33 +364,46 @@ async def update_profile_picture(request: Request, body: ProfilePictureUpdate):
         user_id = user_response.user.id
 
         # Use the admin client to bypass RLS for the update
-        update_response = supabase_admin.table("users").update({
-            "profile_picture_url": body.profile_picture_url
-        }).eq("id", user_id).execute()
+        update_response = (
+            supabase_admin.table("users")
+            .update({"profile_picture_url": body.profile_picture_url})
+            .eq("id", user_id)
+            .execute()
+        )
 
         if not update_response.data:
             # This could happen if the user ID doesn't exist, even with admin rights
-            raise HTTPException(status_code=404, detail="User not found or failed to update profile picture")
+            raise HTTPException(
+                status_code=404,
+                detail="User not found or failed to update profile picture",
+            )
 
         updated_user = update_response.data[0]
-        
+
         return {
             "username": updated_user["username"],
-            "profile_picture_url": updated_user["profile_picture_url"]
+            "profile_picture_url": updated_user["profile_picture_url"],
         }
-        
+
     except HTTPException:
         raise
     except Exception as e:
         # Generic error for production
-        print(f"An unexpected error occurred while updating profile picture for user {user_id}: {e}")
-        raise HTTPException(status_code=500, detail="An internal server error occurred.")
+        print(
+            f"An unexpected error occurred while updating profile picture for user {user_id}: {e}"
+        )
+        raise HTTPException(
+            status_code=500, detail="An internal server error occurred."
+        )
+
 
 @app.post("/addMatch")
 async def add_match(request: Request, payload: AddMatchPayload):
     auth_header = request.headers.get("authorization")
     if not auth_header or not auth_header.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="Missing or invalid Authorization header")
+        raise HTTPException(
+            status_code=401, detail="Missing or invalid Authorization header"
+        )
 
     token = auth_header.replace("Bearer ", "")
     user_response = supabase.auth.get_user(token)
@@ -374,19 +413,47 @@ async def add_match(request: Request, payload: AddMatchPayload):
 
     user_id = user_response.user.id
 
-    insert_resp = supabase_admin.table("history").insert({
-        "user_id": str(user_id),
-        "patient_info": payload.patient_info,
-        "score": payload.score,
-        "submitted_diagnosis": payload.submitted_diagnosis,
-        "submitted_aftercare": payload.submitted_aftercare,
-        "feedback": payload.feedback
-    }).execute()
-    
+    insert_resp = (
+        supabase_admin.table("history")
+        .insert(
+            {
+                "user_id": str(user_id),
+                "patient_info": payload.patient_info,
+                "score": payload.score,
+                "submitted_diagnosis": payload.submitted_diagnosis,
+                "submitted_aftercare": payload.submitted_aftercare,
+                "feedback": payload.feedback,
+            }
+        )
+        .execute()
+    )
+
     if not insert_resp.data:
         raise HTTPException(500, "Failed to insert match history.")
 
     return insert_resp.data[0]
+
+
+@app.get("/patients/random")
+async def get_random_patient_endpoint(request: Request):
+    auth = request.headers.get("authorization")
+    if not auth or not auth.startswith("Bearer "):
+        raise HTTPException(401, "Missing or invalid Authorization header")
+    token = auth.split(" ", 1)[1]
+    user_resp = supabase.auth.get_user(token)
+    if user_resp.user is None:
+        raise HTTPException(401, "Invalid token")
+
+    count_res = (
+        supabase.table("patient_data").select("id", count="exact", head=True).execute()
+    )
+
+    offset = random.randrange(count_res)
+    row_res = supabase.table("patient_data").select("*").range(offset, offset).execute()
+
+    patient = row_res.data[0]
+    return patient
+
 
 @app.get("/fetchHistory", response_model=List[HistoryEntry])
 async def fetch_history(request: Request):
@@ -398,7 +465,9 @@ async def fetch_history(request: Request):
     try:
         auth_header = request.headers.get("authorization")
         if not auth_header or not auth_header.startswith("Bearer "):
-            raise HTTPException(status_code=401, detail="Missing or invalid Authorization header")
+            raise HTTPException(
+                status_code=401, detail="Missing or invalid Authorization header"
+            )
 
         token = auth_header.replace("Bearer ", "")
         user_response = supabase.auth.get_user(token)
@@ -409,11 +478,13 @@ async def fetch_history(request: Request):
         user_id = user_response.user.id
 
         # Query Supabase for this user's history, sorted by most recent
-        response = supabase_admin.table("history")\
-            .select("*")\
-            .eq("user_id", user_id)\
-            .order("created_at", desc=True)\
+        response = (
+            supabase_admin.table("history")
+            .select("*")
+            .eq("user_id", user_id)
+            .order("created_at", desc=True)
             .execute()
+        )
 
         if not response.data:
             return []
@@ -425,9 +496,6 @@ async def fetch_history(request: Request):
     except Exception as e:
         print("🔥 Error fetching history:", e)
         traceback.print_exc()
-        raise HTTPException(status_code=500, detail="An internal server error occurred.")
-
-@app.get("/debug-db")
-async def debug_db_endpoint():
-    # Call your helper and return its result as JSON
-    return debug_db()
+        raise HTTPException(
+            status_code=500, detail="An internal server error occurred."
+        )

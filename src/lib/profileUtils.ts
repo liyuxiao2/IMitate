@@ -1,5 +1,5 @@
-import { supabase } from './supabaseClient';
-import { apiEndpoints } from './apiConfig';
+import { supabase } from "./supabaseClient";
+import { apiEndpoints } from "./apiConfig";
 
 export interface ProfilePictureUploadResult {
   success: boolean;
@@ -13,13 +13,16 @@ export interface ProfilePictureUploadResult {
  * @param userId - The user's ID
  * @returns Promise with upload result
  */
-export async function uploadProfilePicture(file: File, userId: string): Promise<ProfilePictureUploadResult> {
+export async function uploadProfilePicture(
+  file: File,
+  userId: string,
+): Promise<ProfilePictureUploadResult> {
   try {
     // Validate file type
-    if (!file.type.startsWith('image/')) {
+    if (!file.type.startsWith("image/")) {
       return {
         success: false,
-        error: 'File must be an image'
+        error: "File must be an image",
       };
     }
 
@@ -27,41 +30,40 @@ export async function uploadProfilePicture(file: File, userId: string): Promise<
     if (file.size > 5 * 1024 * 1024) {
       return {
         success: false,
-        error: 'File size must be less than 5MB'
+        error: "File size must be less than 5MB",
       };
     }
 
     // Upload file to Supabase Storage
-    const fileExt = file.name.split('.').pop();
+    const fileExt = file.name.split(".").pop();
     const fileName = `${userId}/profile.${fileExt}`;
-    
+
     const { error: uploadError } = await supabase.storage
-      .from('profile-pictures')
+      .from("profile-pictures")
       .upload(fileName, file, {
-        upsert: true
+        upsert: true,
       });
 
     if (uploadError) {
       return {
         success: false,
-        error: uploadError.message
+        error: uploadError.message,
       };
     }
 
     // Get the public URL
     const { data: urlData } = supabase.storage
-      .from('profile-pictures')
+      .from("profile-pictures")
       .getPublicUrl(fileName);
 
     return {
       success: true,
-      url: urlData.publicUrl
+      url: urlData.publicUrl,
     };
-
   } catch (error) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error occurred'
+      error: error instanceof Error ? error.message : "Unknown error occurred",
     };
   }
 }
@@ -72,7 +74,10 @@ export async function uploadProfilePicture(file: File, userId: string): Promise<
  * @param accessToken - User's access token
  * @returns Promise with update result
  */
-export async function updateProfilePictureUrl(profilePictureUrl: string, accessToken: string): Promise<boolean> {
+export async function updateProfilePictureUrl(
+  profilePictureUrl: string,
+  accessToken: string,
+): Promise<boolean> {
   try {
     const response = await fetch(apiEndpoints.updateProfilePicture, {
       method: "POST",
@@ -97,7 +102,9 @@ export async function updateProfilePictureUrl(profilePictureUrl: string, accessT
  * @param userId - The user's ID
  * @returns Promise with profile picture URL or null
  */
-export async function getProfilePictureUrl(userId: string): Promise<string | null> {
+export async function getProfilePictureUrl(
+  userId: string,
+): Promise<string | null> {
   try {
     const { data, error } = await supabase
       .from("users")
@@ -114,4 +121,4 @@ export async function getProfilePictureUrl(userId: string): Promise<string | nul
     console.error("Error fetching profile picture URL:", error);
     return null;
   }
-} 
+}

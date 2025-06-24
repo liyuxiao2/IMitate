@@ -84,7 +84,7 @@ export default function ProfilePage() {
   };
 
   const handleFileUpload = async (
-    event: React.ChangeEvent<HTMLInputElement>
+    event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -109,7 +109,7 @@ export default function ProfilePage() {
       // Update the profile picture URL in the database
       const updateSuccess = await updateProfilePictureUrl(
         uploadResult.url!,
-        session.access_token
+        session.access_token,
       );
 
       if (!updateSuccess) {

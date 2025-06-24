@@ -1,7 +1,5 @@
 // API configuration for different environments
-export const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL;
-
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export const apiEndpoints = {
   getProfile: `${API_BASE_URL}getProfile`,
@@ -13,4 +11,4 @@ export const apiEndpoints = {
   evaluate: `${API_BASE_URL}evaluate`,
   getRandomPatient: `${API_BASE_URL}patients/random`,
   fetchHistory: `${API_BASE_URL}fetchHistory`,
-}; 
+};

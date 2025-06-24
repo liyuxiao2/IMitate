@@ -88,7 +88,6 @@ Medical Student's Question: "How long have you had this headache?"
 
 <hr />
 
-
 <hr />
 
 <h2>🤝 Contributors</h2>

@@ -124,7 +124,7 @@ export default function ChatBot() {
       try {
         const transcript = await startSpeechRecognition(
           () => console.log("Speech started"),
-          () => setIsListening(false)
+          () => setIsListening(false),
         );
         if (transcript.trim()) {
           setInput(transcript);
@@ -320,7 +320,7 @@ export default function ChatBot() {
 
                 if (!patient) {
                   console.error(
-                    "Cannot submit evaluation without a loaded patient."
+                    "Cannot submit evaluation without a loaded patient.",
                   );
                   setIsModalOpen(false);
                   return;

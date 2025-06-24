@@ -1,5 +1,5 @@
-import SocialScreen from "@/components/ui/social-screen"
-import Sidebar from "@/components/ui/sidebar"
+import SocialScreen from "@/components/ui/social-screen";
+import Sidebar from "@/components/ui/sidebar";
 
 export default function Page() {
   return (
@@ -7,5 +7,5 @@ export default function Page() {
       <Sidebar activePage="Social" />
       <SocialScreen />
     </div>
-  )
+  );
 }
