@@ -54,35 +54,34 @@ export async function loadPatient({
   setDiagnosisInput("");
   setAftercareInput("");
 
-  try {
+try {
     console.log("Fetching patient from:", apiEndpoints.getRandomPatient);
     const token = (await supabase.auth.getSession()).data.session?.access_token;
     const res = await fetch(apiEndpoints.getRandomPatient, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     });
     console.log("Fetch completed with status", res.status);
     const data = await res.json();
     console.log("Received data:", data);
 
-    if (data && Array.isArray(data.patient)) {
+    // **Handle object shape directly**:
+    if (data && data.id) {
       const patientObj: Patient = {
-        id: data.patient[0],
-        first_name: data.patient[1],
-        last_name: data.patient[2],
-        age: data.patient[3],
-        sex: data.patient[4],
-        pronouns: data.patient[5],
-        height_cm: data.patient[6],
-        weight_kg: data.patient[7],
-        temp_c: data.patient[8],
-        heart_rate_bpm: data.patient[9],
-        primary_complaint: data.patient[10],
-        personality: data.patient[11],
-        symptoms: data.patient[12],
-        medical_history: data.patient[13],
-        correct_diagnosis: data.patient[14],
+        id: data.id,
+        first_name: data.first_name,
+        last_name: data.last_name,
+        age: data.age,
+        sex: data.sex,
+        pronouns: data.pronouns,
+        height_cm: data.height_cm,
+        weight_kg: data.weight_kg,
+        temp_c: data.temp_c,
+        heart_rate_bpm: data.heart_rate_bpm,
+        primary_complaint: data.primary_complaint,
+        personality: data.personality,
+        symptoms: data.symptoms,
+        medical_history: data.medical_history,
+        correct_diagnosis: data.correct_diagnosis,
       };
 
       setPatient(patientObj);
@@ -95,7 +94,7 @@ export async function loadPatient({
         Pronouns: ${patientObj.pronouns}
         Height: ${patientObj.height_cm} cm
         Weight: ${patientObj.weight_kg} kg
-        Temperature: ${patientObj.temp_c} C
+        Temperature: ${patientObj.temp_c}°C
         Heart Rate: ${patientObj.heart_rate_bpm} bpm
         Primary Complaint: ${patientObj.primary_complaint}
         Symptoms: ${patientObj.symptoms}
@@ -104,9 +103,8 @@ export async function loadPatient({
       `.trim();
 
       setPatientContext(contextString);
-      setMessages([]); // Clear chat history
-      setIsIntroModalOpen(true); // Open the intro modal
-
+      setMessages([]);
+      setIsIntroModalOpen(true);
       setMessages([
         {
           id: Date.now().toString(),
@@ -115,8 +113,9 @@ export async function loadPatient({
           timestamp: new Date(),
         },
       ]);
+
     } else {
-      console.warn("No patients found in response.");
+      console.warn("Unexpected response shape:", data);
     }
   } catch (err) {
     console.error("Failed to load patient", err);
