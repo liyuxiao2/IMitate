@@ -43,6 +43,8 @@ next-env.d.ts
 #python enviorment
 venv
 
+__pycache__
+
 *.pyc
 src/api/__pycache__/main.cpython-39.pyc
 src/api/__pycache__/database.cpython-39.pyc
