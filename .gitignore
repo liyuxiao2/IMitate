@@ -43,7 +43,11 @@ next-env.d.ts
 #python enviorment
 venv
 
+<<<<<<< Updated upstream
 *.pyc
 src/api/__pycache__/main.cpython-39.pyc
 src/api/__pycache__/database.cpython-39.pyc
 *.pyc
+=======
+**/__pycache__/
+>>>>>>> Stashed changes
