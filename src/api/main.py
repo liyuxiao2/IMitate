@@ -430,25 +430,57 @@ async def add_match(request: Request, payload: AddMatchPayload):
     return insert_resp.data[0]
 
 
-@app.get("/patients/random")
+@app.get("/patients/random", response_model=PatientData)
 async def get_random_patient_endpoint(request: Request):
-    auth = request.headers.get("authorization")
-    if not auth or not auth.startswith("Bearer "):
+    """
+    Returns one random patient from Supabase, after verifying the caller's JWT.
+    """
+    # 1) Extract and validate the Authorization header
+    auth_header = request.headers.get("authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
         raise HTTPException(401, "Missing or invalid Authorization header")
-    token = auth.split(" ", 1)[1]
+
+    token = auth_header.split(" ", 1)[1]
     user_resp = supabase.auth.get_user(token)
     if user_resp.user is None:
         raise HTTPException(401, "Invalid token")
 
-    count_res = (
-        supabase.table("patient_data").select("id", count="exact", head=True).execute()
-    )
+    try:
+        # 2) Count the total rows
+        count_res = (
+            supabase_admin
+            .table("patient_data")
+            .select("id", count="exact", head=True)
+            .execute()
+        )
+        total = count_res.count or 0
+        if total == 0:
+            raise HTTPException(404, "No patients found")
 
-    offset = random.randrange(count_res)
-    row_res = supabase.table("patient_data").select("*").range(offset, offset).execute()
+        # 3) Pick a random offset and fetch that single row
+        offset = random.randrange(total)
+        row_res = (
+            supabase_admin
+            .table("patient_data")
+            .select("*")
+            .range(offset, offset)
+            .execute()
+        )
+        data = row_res.data
+        if not data:
+            raise HTTPException(500, "Failed to retrieve random patient")
 
-    patient = row_res.data[0]
-    return patient
+        # 4) Return the one PatientData
+        return data[0]
+
+    except HTTPException:
+        # re-raise your intended HTTP errors
+        raise
+    except Exception as e:
+        # catch-all for anything unexpected
+        print("🔥 Error in get_random_patient_endpoint:", e)
+        traceback.print_exc()
+        raise HTTPException(500, "Internal server error")
 
 
 @app.get("/fetchHistory", response_model=List[HistoryEntry])
