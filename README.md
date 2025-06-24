@@ -93,7 +93,9 @@ Medical Student's Question: "How long have you had this headache?"
 <h2>🤝 Contributors</h2>
 <ul>
   <li><a href="https://github.com/liyuxiao2" target="_blank">Liyu Xiao</a></li>
-  <li>Jeff Guo, Arian Emamjomeh, Chris Zhu</li>
+  <li><a href="https://github.com/jeffguo-06" target="_blank">Jeff Guo</a></li>
+  <li> Arian Emamjomeh, </li>
+  <li> Chris Zhu</li>
 </ul>
 
 <hr />
