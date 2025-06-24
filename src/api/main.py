@@ -1,3 +1,4 @@
+import random
 from fastapi import FastAPI, Request, HTTPException
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
@@ -6,7 +7,6 @@ import os
 from dotenv import load_dotenv
 import traceback
 from typing import List
-from .data.database import get_random_patient, debug_db
 # Load environment variables
 load_dotenv()
 
@@ -165,14 +165,6 @@ async def chat_endpoint(request: ChatRequest):
 
     return {"reply": reply or "Sorry, I couldn't generate a response."}
 
-
-@app.get("/patients/random")
-async def get_random_patient_endpoint():
-    """Get a single random patient from the database"""
-    patient = get_random_patient()
-    if patient:
-        return {"patient": patient}
-    return {"error": "No patients found in database"}
 
 
 @app.post("/evaluate")
@@ -388,6 +380,34 @@ async def add_match(request: Request, payload: AddMatchPayload):
 
     return insert_resp.data[0]
 
+
+@app.get("/patients/random")
+async def get_random_patient_endpoint(request: Request):
+    auth = request.headers.get("authorization")
+    if not auth or not auth.startswith("Bearer "):
+        raise HTTPException(401, "Missing or invalid Authorization header")
+    token = auth.split(" ", 1)[1]
+    user_resp = supabase.auth.get_user(token)
+    if user_resp.user is None:
+        raise HTTPException(401, "Invalid token")
+    
+    count_res = supabase\
+    .table("patient_data")\
+    .select("id", count="exact", head=True)\
+    .execute()
+    
+    offset = random.randrange(count_res)
+    row_res = (
+        supabase
+        .table("patient_data")
+        .select("*")
+        .range(offset, offset)
+        .execute()
+    )
+
+    patient = row_res.data[0]  
+    return patient
+
 @app.get("/fetchHistory", response_model=List[HistoryEntry])
 async def fetch_history(request: Request):
     """
@@ -426,8 +446,3 @@ async def fetch_history(request: Request):
         print("🔥 Error fetching history:", e)
         traceback.print_exc()
         raise HTTPException(status_code=500, detail="An internal server error occurred.")
-
-@app.get("/debug-db")
-async def debug_db_endpoint():
-    # Call your helper and return its result as JSON
-    return debug_db()
