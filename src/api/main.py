@@ -304,6 +304,7 @@ async def add_score(payload: ScorePayload, request: Request):
         print("User data:", user_data)
 
         current_score = user_data.get("total_score", 0) or 0
+        print(payload.score)
         new_score = current_score + payload.score
 
         update_response = (

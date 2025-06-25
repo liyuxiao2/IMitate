@@ -224,7 +224,6 @@ export default function ChatBot() {
     }
 
     try {
-      console.log("Eval Result", evaluationResult);
       const res = await fetch(apiEndpoints.addMatch, {
         method: "POST",
         headers: {
