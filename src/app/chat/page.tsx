@@ -219,6 +219,7 @@ export default function ChatBot() {
 
       const result = await res.json();
       console.log("Score updated successfully:", result);
+
     } catch (err) {
       console.error("Error adding score:", err);
     }
@@ -238,8 +239,10 @@ export default function ChatBot() {
           feedback: feedbackText ?? "No History Saved",
         }),
       });
-      const result = await res.json();
-      console.log("Score updated successfully:", result);
+
+      if (!res.ok) {
+        throw new Error("Failed to update matches");
+      }
     } catch (err) {
       console.error("Error adding match:", err);
     }
