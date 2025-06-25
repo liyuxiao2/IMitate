@@ -10,31 +10,7 @@ from typing import List
 
 # Load environment variables
 load_dotenv()
-
-# Supabase configuration (embedded to avoid import issues)
-from supabase import create_client, Client
-
-# Try both frontend and backend environment variable names
-SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_KEY = os.getenv("SUPABASE_ANON_KEY")
-SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY")
-
-if not SUPABASE_URL:
-    raise ValueError("Missing Supabase URL environment variable. Set SUPABASE_URL.")
-if not SUPABASE_KEY:
-    raise ValueError(
-        "Missing Supabase Anon Key environment variable. Set SUPABASE_ANON_KEY."
-    )
-if not SUPABASE_SERVICE_KEY:
-    raise ValueError(
-        "Missing Supabase Service Key environment variable. Set SUPABASE_SERVICE_KEY."
-    )
-
-# Client for frontend-like access (auth, anon RLS)
-supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
-
-# Admin client that bypasses RLS (for trusted server-side operations)
-supabase_admin: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+from supabase.supabase_client import supabase, supabase_admin
 
 
 app = FastAPI()
