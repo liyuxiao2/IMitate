@@ -300,6 +300,13 @@ async def add_score(payload: ScorePayload, request: Request):
 
         update_response = supabase.table("users").update({"total_score": new_score}).eq("id", user_id).execute()
         print("Update response:", update_response)
+        
+        print("auth.uid():", user_response.user.id)
+        print("payload score:", payload.score)
+        print("Authorization header:", auth_header)
+        print("Supabase user:", user_response.user)
+
+
 
         return {"message": "Score updated", "new_score": new_score}
     
@@ -307,7 +314,7 @@ async def add_score(payload: ScorePayload, request: Request):
         print("🔥 Exception occurred:", e)
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Server error: {str(e)}") 
-    
+      
 
 
 @app.get("/getLeaderboard")
