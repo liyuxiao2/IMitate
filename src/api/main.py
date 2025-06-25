@@ -10,7 +10,7 @@ from typing import List
 
 # Load environment variables
 load_dotenv()
-from supabase.supabase_client import supabase, supabase_admin
+from api.supabase_client import supabase, supabase_admin
 
 
 app = FastAPI()
