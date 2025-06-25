@@ -280,9 +280,7 @@ async def add_score(payload: ScorePayload, request: Request):
     try:
         auth_header = request.headers.get("authorization")
         if not auth_header or not auth_header.startswith("Bearer "):
-            raise HTTPException(
-                status_code=401, detail="Missing or invalid Authorization header"
-            )
+            raise HTTPException(status_code=401, detail="Missing or invalid Authorization header")
 
         token = auth_header.replace("Bearer ", "")
         user_response = supabase.auth.get_user(token)
@@ -293,34 +291,23 @@ async def add_score(payload: ScorePayload, request: Request):
         user_id = user_response.user.id
         print("Auth user_id:", user_id)
 
-        user_data_response = (
-            supabase.table("users")
-            .select("total_score")
-            .eq("id", user_id)
-            .single()
-            .execute()
-        )
+        user_data_response = supabase.table("users").select("total_score").eq("id", user_id).single().execute()
         user_data = user_data_response.data
         print("User data:", user_data)
 
         current_score = user_data.get("total_score", 0) or 0
-        print(payload.score)
         new_score = current_score + payload.score
 
-        update_response = (
-            supabase.table("users")
-            .update({"total_score": new_score})
-            .eq("id", user_id)
-            .execute()
-        )
+        update_response = supabase.table("users").update({"total_score": new_score}).eq("id", user_id).execute()
         print("Update response:", update_response)
 
         return {"message": "Score updated", "new_score": new_score}
-
+    
     except Exception as e:
         print("🔥 Exception occurred:", e)
         traceback.print_exc()
-        raise HTTPException(status_code=500, detail=f"Server error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Server error: {str(e)}") 
+    
 
 
 @app.get("/getLeaderboard")
