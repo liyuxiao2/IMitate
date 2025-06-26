@@ -19,7 +19,7 @@ export default function Sidebar({ activePage }: SidebarProps) {
     <div className="w-64 bg-mcmaster-maroon text-white flex-col shrink-0 hidden md:flex">
       {/* Logo */}
       <div className="p-6">
-        <Link href="/">
+        <Link href="/Home">
           <Image
             src="/IMlogo.png"
             alt="IMitate Logo"

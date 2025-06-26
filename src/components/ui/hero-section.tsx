@@ -4,8 +4,8 @@ import { useRouter } from "next/navigation";
 export default function HeroSection() {
   const router = useRouter();
 
-  const handleAuthRedirect = () => {
-    router.push("/auth");
+  const handleRedirect = () => {
+    router.push("/chat");
   };
 
   return (
@@ -14,7 +14,7 @@ export default function HeroSection() {
       style={{ backgroundImage: "url('/BGIMGF.png')" }}
     >
       <button
-        onClick={handleAuthRedirect}
+        onClick={handleRedirect}
         className="mt-125 bg-gradient-to-r from-mcmaster-maroon to-mcmaster-light text-white font-bold text-lg sm:text-xl px-8 sm:px-12 py-4 sm:py-6 rounded-full hover:shadow-2xl hover:-translate-y-1 active:translate-y-0 transition-all duration-300 uppercase tracking-wider animate-fade-in-up animate-delay-600 shadow-mcmaster"
       >
         CHAT NOW

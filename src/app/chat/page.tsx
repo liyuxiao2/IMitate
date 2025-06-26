@@ -11,9 +11,9 @@ import ReactMarkdown from "react-markdown";
 import Sidebar from "@/components/ui/sidebar";
 import Header from "@/components/ui/header";
 import CountdownTimer from "@/components/ui/timer";
-import { loadPatient } from "./loadPatient";
+import { loadPatient } from "./components/loadPatient";
 import { supabase } from "@/lib/supabaseClient";
-import startSpeechRecognition from "./voice";
+import startSpeechRecognition from "./components/voice";
 import { apiEndpoints } from "@/lib/apiConfig";
 
 interface Message {
