@@ -4,7 +4,7 @@ export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 export const apiEndpoints = {
   getProfile: `${API_BASE_URL}getProfile`,
   getLeaderboard: `${API_BASE_URL}getLeaderboard`,
-  updateProfilePicture: `${API_BASE_URL}updateProfilePicture`,
+  updateProfilePicture: `${API_BASE_URL}/updateProfilePicture`,
   addScore: `${API_BASE_URL}/addScore`,
   addMatch: `${API_BASE_URL}/addMatch`,
   chat: `${API_BASE_URL}/chat`,
