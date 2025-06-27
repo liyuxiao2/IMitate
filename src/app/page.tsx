@@ -253,7 +253,7 @@ const AuthForm = () => {
 
 export default function AuthPage() {
   return (
-    <div className="min-h-screen flex flex-col" style={{ backgroundImage: "url('/BGIMGF.png')" }}>
+    <div className="min-h-screen flex flex-col bg-cover" style={{ backgroundImage: "url('/BGIMGF.png')" }}>
       <AuthForm />
     </div>
   );
