@@ -67,6 +67,7 @@ export async function submitEvaluation(
     diagnosisInput,
     aftercareInput,
     timeLeft,
+    totalTime,
     getChatHistory,
     setIsModalOpen,
     setIsEvaluating,
@@ -78,6 +79,7 @@ export async function submitEvaluation(
     diagnosisInput: string;
     aftercareInput: string;
     timeLeft: number;
+    totalTime: number;
     getChatHistory: () => string;
     setIsModalOpen: (val: boolean) => void;
     setIsEvaluating: (val: boolean) => void;
@@ -103,7 +105,8 @@ export async function submitEvaluation(
     chatHistory,
     submittedDiagnosis: diagnosisInput,
     submittedAftercare: aftercareInput,
-    timeLeft: timeLeft
+    timeLeft: timeLeft,
+    totalTime: totalTime
   };
 
   try {
