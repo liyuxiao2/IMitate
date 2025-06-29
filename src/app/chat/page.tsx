@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -68,6 +68,10 @@ export default function ChatBot() {
   const [isIntroModalOpen, setIsIntroModalOpen] = useState(false);
 
   const [timeLeft, setTimeLeft] = useState(600);
+  const handleTick = useCallback((newTime: number) => {
+    setTimeLeft(newTime);
+  }, []);
+
 
   useEffect(() => {
     loadPatient({
@@ -455,7 +459,7 @@ export default function ChatBot() {
 
                   <CountdownTimer
                     seconds={timeLeft}
-                    onTick={setTimeLeft}
+                    onTick={handleTick}
                     onTimeout={() => {
                       setIsTyping(true);
                       setIsListening(false);
@@ -565,3 +569,4 @@ export default function ChatBot() {
     </div>
   );
 }
+
