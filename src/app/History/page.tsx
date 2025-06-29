@@ -84,13 +84,13 @@ export default function HistoryPage() {
         <Header />
 
         <main className="flex-1 p-12">
-          <h1 className="text-5xl font-bold text-mcmaster-maroon mb-4">
+          <h1 className="text-5xl font-bold text-mcmaster-maroon mb-4 stic">
             History
           </h1>
 
-          <div className="bg-white rounded-lg shadow-md overflow-hidden">
+          <div className="bg-white rounded-lg shadow-md overflow-scroll max-h-150">
             <table className="min-w-full">
-              <thead className="bg-mcmaster-maroon text-white">
+              <thead className="sticky top-0 bg-mcmaster-maroon text-white">
                 <tr>
                   <th className="py-4 px-8 text-left font-semibold">Patient</th>
                   <th className="py-4 px-8 text-left font-semibold">

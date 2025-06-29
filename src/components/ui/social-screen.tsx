@@ -79,7 +79,7 @@ export default function SocialScreen() {
   }
 
   return (
-    <div className="flex-1 flex flex-col">
+    <div className="flex-1 flex flex-col overflow-hidden">
       {/* Header */}
       <Header />
 
@@ -92,7 +92,7 @@ export default function SocialScreen() {
           </p>
 
           {/* Top 3 Users */}
-          <div className="flex justify-center items-end gap-8 mb-16 h-80">
+          <div className="flex justify-center items-end gap-8 h-80 mb-8">
             {/* 2nd Place */}
             {top3.length > 1 && (
               <div className="flex flex-col items-center justify-center text-center">
@@ -168,37 +168,37 @@ export default function SocialScreen() {
           </div>
 
           {/* Leaderboard Table */}
-          <div className="space-y-2">
+          <div className="space-y-2 overflow-scroll max-h-65 bg-white border-gray-200 p-4 rounded-md">
             {/* Header */}
-            <div className="grid grid-cols-3 gap-4 px-6 py-3 text-gray-600 font-medium text-lg">
+            <div className="sticky top-0grid grid-cols-3 gap-4 px-6 py-3 text-gray-600 font-medium text-lg">
               <div>User</div>
               <div className="text-center">Rank</div>
               <div className="text-right">Total Points</div>
             </div>
 
             {/* Leaderboard Rows */}
-            {rest.map((user, index) => (
-              <div
-                key={user.username}
-                className="bg-gray-300 rounded-full px-6 py-4 grid grid-cols-3 gap-4 items-center"
-              >
-                <div className="text-gray-800 font-medium flex items-center gap-3">
-                  <Avatar className="w-8 h-8">
-                    <AvatarImage src={user.profile_picture_url} />
-                    <AvatarFallback>
-                      <User className="w-4 h-4" />
-                    </AvatarFallback>
-                  </Avatar>
-                  {user.username}
+              {rest.map((user, index) => (
+                <div
+                  key={user.username}
+                  className="bg-gray-300 rounded-full px-6 py-4 grid grid-cols-3 gap-4 items-center"
+                >
+                  <div className="text-gray-800 font-medium flex items-center gap-3">
+                    <Avatar className="w-8 h-8">
+                      <AvatarImage src={user.profile_picture_url} />
+                      <AvatarFallback>
+                        <User className="w-4 h-4" />
+                      </AvatarFallback>
+                    </Avatar>
+                    {user.username}
+                  </div>
+                  <div className="text-center text-gray-700 font-semibold">
+                    {index + 4}
+                  </div>
+                  <div className="text-right text-gray-600 italic">
+                    {user.total_score.toLocaleString()}
+                  </div>
                 </div>
-                <div className="text-center text-gray-700 font-semibold">
-                  {index + 4}
-                </div>
-                <div className="text-right text-gray-600 italic">
-                  {user.total_score.toLocaleString()}
-                </div>
-              </div>
-            ))}
+              ))}
           </div>
         </div>
       </div>
