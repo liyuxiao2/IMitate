@@ -440,10 +440,12 @@ async def get_random_patient_endpoint(request: Request):
             .execute()
         )
         data = row_res.data
+        print(data)
         if not data:
             raise HTTPException(500, "Failed to retrieve random patient")
 
         # 4) Return the one PatientData
+        print(data[0])
         return data[0]
 
     except HTTPException:
