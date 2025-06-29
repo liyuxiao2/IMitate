@@ -12,9 +12,9 @@ import Sidebar from "@/components/ui/sidebar";
 import Header from "@/components/ui/header";
 import CountdownTimer from "@/components/ui/timer";
 import { loadPatient } from "./components/loadPatient";
-import { supabase } from "@/lib/supabaseClient";
 import startSpeechRecognition from "./components/voice";
 import { apiEndpoints } from "@/lib/apiConfig";
+import { submitEvaluation } from "./components/submit";
 
 interface Message {
   id: string;
@@ -23,7 +23,7 @@ interface Message {
   timestamp: Date;
 }
 
-interface Patient {
+export interface Patient {
   id: string;
   first_name: string;
   last_name: string;
@@ -66,6 +66,8 @@ export default function ChatBot() {
 
   const [isEvaluating, setIsEvaluating] = useState(false);
   const [isIntroModalOpen, setIsIntroModalOpen] = useState(false);
+
+  const [timeLeft, setTimeLeft] = useState(600);
 
   useEffect(() => {
     loadPatient({
@@ -140,6 +142,7 @@ export default function ChatBot() {
     }
   };
 
+  //handles chat response
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim()) return;
@@ -154,7 +157,7 @@ export default function ChatBot() {
 
     try {
       const prompt = patientContext
-        ? `${patientContext}\n\nUser: ${userInput}`
+        ? `${patientContext}\n\nUser: ${userInput}, time remaining`
         : userInput;
       const response = await fetchGeminiResponse(prompt);
       addMessage("bot", response);
@@ -200,53 +203,6 @@ export default function ChatBot() {
     });
   };
 
-  async function handleSubmitDiagnosis(score: number, feedbackText: string) {
-    const token = (await supabase.auth.getSession()).data.session?.access_token;
-
-    try {
-      const res = await fetch(apiEndpoints.addScore, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ score: score }),
-      });
-
-      if (!res.ok) {
-        throw new Error("Failed to update score");
-      }
-
-      const result = await res.json();
-      console.log("Score updated successfully:", result);
-
-    } catch (err) {
-      console.error("Error adding score:", err);
-    }
-
-    try {
-      const res = await fetch(apiEndpoints.addMatch, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          patient_info: patient, // object (dictionary)
-          submitted_diagnosis: diagnosisInput, // string
-          submitted_aftercare: aftercareInput, // string
-          score: score, // number
-          feedback: feedbackText ?? "No History Saved",
-        }),
-      });
-
-      if (!res.ok) {
-        throw new Error("Failed to update matches");
-      }
-    } catch (err) {
-      console.error("Error adding match:", err);
-    }
-  }
 
   return (
     <div className="flex h-screen bg-stone-200 font-sans">
@@ -318,57 +274,21 @@ export default function ChatBot() {
                 <X className="h-4 w-4" />
               </Button>
             </div>
-            <form
-              onSubmit={async (e) => {
-                e.preventDefault();
-
-                if (!patient) {
-                  console.error(
-                    "Cannot submit evaluation without a loaded patient.",
-                  );
-                  setIsModalOpen(false);
-                  return;
-                }
-
-                setIsModalOpen(false);
-                setIsEvaluating(true);
-
-                const chatHistory = getChatHistory();
-                const evaluationData = {
-                  patientData: patient,
-                  chatHistory: chatHistory,
-                  submittedDiagnosis: diagnosisInput,
-                  submittedAftercare: aftercareInput,
-                };
-
-                try {
-                  console.log("Submitting for evaluation...", evaluationData);
-                  const res = await fetch(apiEndpoints.evaluate, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(evaluationData),
-                  });
-
-                  if (!res.ok) {
-                    throw new Error(`Evaluation API error: ${res.status}`);
-                  }
-
-                  const result = await res.json();
-
-                  const feedbackText = result.evaluation;
-                  const score = result.score;
-
-                  setEvaluationResult(feedbackText);
-                  setEvaluationScore(score);
-
-                  handleSubmitDiagnosis(score, feedbackText);
-                  setViewMode("results");
-                } catch (error) {
-                  console.error("Failed to submit evaluation:", error);
-                  // Optionally, show an alert to the user here
-                } finally {
-                  setIsEvaluating(false);
-                }
+            <form 
+            onSubmit={async (e) =>{
+              e.preventDefault();
+              if (!patient) return;
+              submitEvaluation(e, {
+                  patient,
+                  diagnosisInput,
+                  aftercareInput,
+                  getChatHistory,
+                  setIsModalOpen,
+                  setIsEvaluating,
+                  setEvaluationResult,
+                  setEvaluationScore,
+                  setViewMode,
+                })
               }}
             >
               <div className="space-y-4 p-6">
@@ -526,7 +446,6 @@ export default function ChatBot() {
 
               {/* Patient Info & Notes Column */}
               <div className="lg:col-span-1 space-y-6">
-                {/* Timer */}
 
                 <div className="bg-transparent rounded-xl">
                   <div className="bg-[#7a003c] text-white font-semibold py-2 px-4 rounded-t-xl">
@@ -534,7 +453,8 @@ export default function ChatBot() {
                   </div>
 
                   <CountdownTimer
-                    seconds={600}
+                    seconds={timeLeft}
+                    onTick={setTimeLeft}
                     onTimeout={() => {
                       setIsTyping(true);
                       setIsListening(false);

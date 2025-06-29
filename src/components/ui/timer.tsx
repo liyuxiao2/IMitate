@@ -3,31 +3,40 @@ import { useEffect, useState, useCallback } from "react";
 interface CountdownTimerProps {
   seconds: number;
   onTimeout: () => void;
+  onTick?: (timeLeft: number) => void;
 }
 
 export default function CountdownTimer({
   seconds,
   onTimeout,
+  onTick,
 }: CountdownTimerProps) {
   const [timeLeft, setTimeLeft] = useState(seconds);
 
   // Memoize the onTimeout callback to prevent unnecessary re-renders
   const memoizedOnTimeout = useCallback(onTimeout, [onTimeout]);
 
-  // Single timer effect that runs once
   useEffect(() => {
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
-        if (prev <= 1) {
+        const newTime = prev - 1;
+
+        if (newTime <= 0) {
           clearInterval(timer);
+          onTimeout();
           return 0;
         }
-        return prev - 1;
+
+        if (onTick) {
+          onTick(newTime); // notify parent of update
+        }
+
+        return newTime;
       });
     }, 1000);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [onTimeout, onTick]);
 
   // Trigger timeout when hitting zero
   useEffect(() => {
