@@ -55,6 +55,7 @@ class EvaluationRequest(BaseModel):
     submittedDiagnosis: str
     submittedAftercare: str
     timeLeft: int
+    totalTime: int
 
 
 class ScorePayload(BaseModel):
@@ -82,6 +83,7 @@ class AddMatchPayload(BaseModel):
     submitted_diagnosis: str
     submitted_aftercare: str
     feedback: str
+    time: int
 
 
 class HistoryRequest(BaseModel):
@@ -176,7 +178,7 @@ async def evaluate_performance(request: EvaluationRequest):
     - Was the line of questioning logical and medically sound?
 
     6. Timing Bonus (2 pts)  
-    - Deduct 0.5 points per minute over {request.timeLeft} minutes (max deduction at ({request.timeLeft} + 5 minutes)).
+    - Deduct (2/({request.totalTime}/60)) points per minute used: (({request.totalTime}-{request.timeLeft}) / 60),  (max deduction if time is over {request.totalTime} seconds).
     """
 
     prompt = f"""
@@ -208,6 +210,8 @@ async def evaluate_performance(request: EvaluationRequest):
         For each category, provide a score (e.g., 8/12) followed by a 1–2 sentence explanation.  
         Do not invent information not present in the transcript.  
         Do not award more than the maximum for each section.
+        
+        Example response:
 
         **Correct Diagnosis: 25/25**  
         The student correctly identified the condition..."""
@@ -399,6 +403,7 @@ async def add_match(request: Request, payload: AddMatchPayload):
                 "submitted_diagnosis": payload.submitted_diagnosis,
                 "submitted_aftercare": payload.submitted_aftercare,
                 "feedback": payload.feedback,
+                "timeLeft": payload.time,
             }
         )
         .execute()

@@ -67,9 +67,17 @@ export default function ChatBot() {
   const [isEvaluating, setIsEvaluating] = useState(false);
   const [isIntroModalOpen, setIsIntroModalOpen] = useState(false);
 
-  const [timeLeft, setTimeLeft] = useState(600);
+  const totalTime = 600;
+  const [timeLeft, setTimeLeft] = useState(totalTime);
+
   const handleTick = useCallback((newTime: number) => {
     setTimeLeft(newTime);
+  }, []);
+
+  const handleTimeout = useCallback(() => {
+    setIsTyping(true);
+    setIsListening(false);
+    setEvaluationResult("❌ You ran out of time.");
   }, []);
 
 
@@ -282,6 +290,7 @@ export default function ChatBot() {
             onSubmit={async (e) =>{
               e.preventDefault();
               if (!patient) return;
+              console.log(timeLeft);
               submitEvaluation(e, {
                   patient,
                   diagnosisInput,
@@ -293,6 +302,7 @@ export default function ChatBot() {
                   setEvaluationScore,
                   setViewMode,
                   timeLeft,
+                  totalTime,
                 })
               }}
             >
@@ -460,11 +470,7 @@ export default function ChatBot() {
                   <CountdownTimer
                     seconds={timeLeft}
                     onTick={handleTick}
-                    onTimeout={() => {
-                      setIsTyping(true);
-                      setIsListening(false);
-                      setEvaluationResult("❌ You ran out of time.");
-                    }}
+                    onTimeout={handleTimeout}
                   />
                 </div>
 

@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 
 interface CountdownTimerProps {
   seconds: number;
@@ -13,9 +13,6 @@ export default function CountdownTimer({
 }: CountdownTimerProps) {
   const [localTime, setLocalTime] = useState(seconds);
 
-  // Memoize the onTimeout callback to prevent unnecessary re-renders
-  const memoizedOnTimeout = useCallback(onTimeout, [onTimeout]);
-
    useEffect(() => {
     const timer = setInterval(() => {
       setLocalTime((prev) => {
@@ -27,24 +24,21 @@ export default function CountdownTimer({
           return 0;
         }
 
-        // Notify parent (safe, async)
-        if (onTick) {
-          onTick(newTime);
-        }
+        onTick?.(newTime);
 
         return newTime;
       });
     }, 1000);
 
     return () => clearInterval(timer); // Clean up on unmount
-  }, [onTick]);
+  }, [onTick, onTimeout]);
 
-  // Trigger timeout when hitting zero
   useEffect(() => {
     if (localTime === 0) {
-      memoizedOnTimeout();
+      onTimeout?.(); // safe now, outside of rendering
     }
-  }, [localTime, memoizedOnTimeout]);
+  }, [localTime, onTimeout]);
+
 
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60)
