@@ -49,12 +49,12 @@ class PatientData(BaseModel):
     correct_diagnosis: str
 
 
-
 class EvaluationRequest(BaseModel):
     patientData: PatientData
     chatHistory: str
     submittedDiagnosis: str
     submittedAftercare: str
+    timeLeft: int
 
 
 class ScorePayload(BaseModel):
@@ -103,10 +103,6 @@ class HistoryEntry(BaseModel):
 async def chat_endpoint(request: ChatRequest):
     gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={GEMINI_API_KEY}"
 
-    print(
-        f"\\n--- Raw prompt received from frontend: ---\\n{request.prompt}\\n-----------------------------------------\\n"
-    )
-
     final_prompt_text = request.prompt
 
     # Check if this is a patient simulation chat
@@ -133,18 +129,12 @@ async def chat_endpoint(request: ChatRequest):
             )
             pass
 
-    print(
-        f"\\n--- Final prompt sent to Gemini: ---\\n{final_prompt_text}\\n-----------------------------------\\n"
-    )
-
     headers = {"Content-Type": "application/json"}
     body = {"contents": [{"parts": [{"text": final_prompt_text}]}]}
 
     async with httpx.AsyncClient() as client:
         response = await client.post(gemini_url, json=body, headers=headers)
         data = response.json()
-
-    print("🔍 Gemini raw response:", data)
 
     reply = ""
     try:
@@ -157,52 +147,70 @@ async def chat_endpoint(request: ChatRequest):
 
 @app.post("/evaluate")
 async def evaluate_performance(request: EvaluationRequest):
-    """
-    Evaluates student performance based on patient data, chat history,
-    and a defined rubric.
-    """
-    evaluation_rubric = """
-    Scoring System (Total 50 pts):
-    - Correct Diagnosis: 25 pts (Is the submitted diagnosis correct? If yes award 25 pts, if no overlap award 0 pts, partial points if partial overlap)
-    Scoring System (Total 50 pts):
-    - Correct Diagnosis: 25 pts (Is the submitted diagnosis correct?)
-    - OLDCARTS Mnemonic: 12 pts (1.5 pts for each component: Onset, Location, Duration, Character, Aggravating/Alleviating factors, Radiation, Temporal pattern, Severity)
-    - Differential Diagnoses: 5 pts (Did the student consider other plausible diagnoses?)
-    - History Gathering: 4 pts (Did they ask about relevant medical, family, or social history?)
-    - Logical, Focused Reasoning: 2 pts (Was the questioning logical and not random?)
-    - Timing Bonus: 2 pts (Deduct 0.5 pts per minute over 5 minutes, max deduction at 9 minutes)
-    If a category is not applicable, award full points for that category.
+    evaluation_rubric = f"""
+    Scoring Rubric (Total 50 points):
+
+    1. Correct Diagnosis (25 pts)  
+    - Full points if diagnosis is entirely correct.  
+    - 0 points if completely incorrect.  
+    - Partial points if partially correct or overlaps with the actual diagnosis.
+
+    2. OLDCARTS Mnemonic (12 pts total, 1.5 pts each)  
+    - Did the student address:  
+        - Onset  
+        - Location  
+        - Duration  
+        - Character  
+        - Aggravating/Alleviating factors  
+        - Radiation  
+        - Temporal pattern  
+        - Severity
+
+    3. Differential Diagnoses (5 pts)  
+    - Did the student consider alternative diagnoses?
+
+    4. History Gathering (4 pts)  
+    - Did they inquire about relevant medical, family, or social history?
+
+    5. Logical, Focused Reasoning (2 pts)  
+    - Was the line of questioning logical and medically sound?
+
+    6. Timing Bonus (2 pts)  
+    - Deduct 0.5 points per minute over {request.timeLeft} minutes (max deduction at ({request.timeLeft} + 5 minutes)).
     """
 
     prompt = f"""
-    You are an expert medical education evaluator. Your task is to analyze a simulated patient encounter and score the medical student's performance based on the provided data and a strict rubric. Do not pamper the student, be objective.
+        You are an expert medical education evaluator. Your task is to analyze a simulated patient encounter and score the medical student's performance based on the provided data and a strict rubric. Do not pamper the student, be objective.
 
-    **1. Full Patient Case:**
-    ```json
-    {request.patientData.model_dump_json(indent=2)}
-    ```
+        **1. Full Patient Case:**
+        ```json
+        {request.patientData.model_dump_json(indent=2)}
+        ```
 
-    **2. Student's Submitted Diagnosis:**
-    - Diagnosis: {request.submittedDiagnosis}
-    - Aftercare Plan: {request.submittedAftercare}
+        **2. Student's Submitted Diagnosis:**
+        - Diagnosis: {request.submittedDiagnosis}
+        - Aftercare Plan: {request.submittedAftercare}
 
-    **3. Full Chat Transcript:**
-    ```
-    {request.chatHistory}
-    ```
+        **3. Full Chat Transcript:**
+        ```
+        {request.chatHistory}
+        ```
 
-    **4. Evaluation Rubric:**
-    {evaluation_rubric}
+        **4. Evaluation Rubric:**
+        {evaluation_rubric}
 
-    **Instructions:**
-    Please evaluate the student's performance by analyzing the chat transcript. Provide a score for each category in the rubric and brief, constructive feedback explaining your reasoning for the score. Your response must be in a structured format.
+        **Instructions:**
+        Please evaluate the student's performance by analyzing the chat transcript. Provide a score for each category in the rubric and brief, constructive feedback explaining your reasoning for the score. Your response must be in a structured format.
 
-    **VERY IMPORTANT:** Your final response MUST begin with the total score as a single integer on the very first line, followed by a newline character. For example:
-    50
-    
-    **Correct Diagnosis: 25/25**
-    The student correctly identified the condition...
-    """
+        **VERY IMPORTANT:** Your final response MUST begin with the total score as a single integer on the very first line, followed by a newline character. For example:
+        50
+
+        For each category, provide a score (e.g., 8/12) followed by a 1–2 sentence explanation.  
+        Do not invent information not present in the transcript.  
+        Do not award more than the maximum for each section.
+
+        **Correct Diagnosis: 25/25**  
+        The student correctly identified the condition..."""
 
     gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={GEMINI_API_KEY}"
     headers = {"Content-Type": "application/json"}
@@ -261,7 +269,9 @@ async def add_score(payload: ScorePayload, request: Request):
     try:
         auth_header = request.headers.get("authorization")
         if not auth_header or not auth_header.startswith("Bearer "):
-            raise HTTPException(status_code=401, detail="Missing or invalid Authorization header")
+            raise HTTPException(
+                status_code=401, detail="Missing or invalid Authorization header"
+            )
 
         token = auth_header.replace("Bearer ", "")
         user_response = supabase.auth.get_user(token)
@@ -272,30 +282,25 @@ async def add_score(payload: ScorePayload, request: Request):
         user_id = user_response.user.id
         print("Auth user_id:", user_id)
 
-        user_data_response = supabase.table("users").select("total_score").eq("id", user_id).single().execute()
+        user_data_response = (
+            supabase.table("users")
+            .select("total_score")
+            .eq("id", user_id)
+            .single()
+            .execute()
+        )
         user_data = user_data_response.data
         print("User data:", user_data)
 
         current_score = user_data.get("total_score", 0) or 0
         new_score = current_score + payload.score
 
-        update_response = supabase.table("users").update({"total_score": new_score}).eq("id", user_id).execute()
-        print("Update response:", update_response)
-        
-        print("auth.uid():", user_response.user.id)
-        print("payload score:", payload.score)
-        print("Authorization header:", auth_header)
-        print("Supabase user:", user_response.user)
-
-
-
         return {"message": "Score updated", "new_score": new_score}
-    
+
     except Exception as e:
         print("🔥 Exception occurred:", e)
         traceback.print_exc()
-        raise HTTPException(status_code=500, detail=f"Server error: {str(e)}") 
-      
+        raise HTTPException(status_code=500, detail=f"Server error: {str(e)}")
 
 
 @app.get("/getLeaderboard")
@@ -310,7 +315,6 @@ async def get_leaderboard():
         .order("total_score", desc=True)
         .execute()
     )
-    print(response.data)
     return response.data
 
 
@@ -414,20 +418,18 @@ async def get_random_patient_endpoint(request: Request):
     auth_header = request.headers.get("authorization")
     if not auth_header or not auth_header.startswith("Bearer "):
         raise HTTPException(
-            status_code=401,
-            detail="Missing or invalid Authorization header"
+            status_code=401, detail="Missing or invalid Authorization header"
         )
 
     token = auth_header.replace("Bearer ", "")
     user_response = supabase.auth.get_user(token)
     if user_response.user is None:
         raise HTTPException(status_code=401, detail="Invalid token")
-    
+
     try:
         # 2) Count the total rows
         count_res = (
-            supabase_admin
-            .table("patient_data")
+            supabase_admin.table("patient_data")
             .select("id", count="exact", head=True)
             .execute()
         )
@@ -438,19 +440,16 @@ async def get_random_patient_endpoint(request: Request):
         # 3) Pick a random offset and fetch that single row
         offset = random.randrange(total)
         row_res = (
-            supabase_admin
-            .table("patient_data")
+            supabase_admin.table("patient_data")
             .select("*")
             .range(offset, offset)
             .execute()
         )
         data = row_res.data
-        print(data)
         if not data:
             raise HTTPException(500, "Failed to retrieve random patient")
 
         # 4) Return the one PatientData
-        print(data[0])
         return data[0]
 
     except HTTPException:
