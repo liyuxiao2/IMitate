@@ -11,39 +11,40 @@ export default function CountdownTimer({
   onTimeout,
   onTick,
 }: CountdownTimerProps) {
-  const [timeLeft, setTimeLeft] = useState(seconds);
+  const [localTime, setLocalTime] = useState(seconds);
 
   // Memoize the onTimeout callback to prevent unnecessary re-renders
   const memoizedOnTimeout = useCallback(onTimeout, [onTimeout]);
 
-  useEffect(() => {
+   useEffect(() => {
     const timer = setInterval(() => {
-      setTimeLeft((prev) => {
+      setLocalTime((prev) => {
         const newTime = prev - 1;
 
         if (newTime <= 0) {
           clearInterval(timer);
-          onTimeout();
+          onTimeout(); // ✅ Only call after state update
           return 0;
         }
 
+        // Notify parent (safe, async)
         if (onTick) {
-          onTick(newTime); // notify parent of update
+          onTick(newTime);
         }
 
         return newTime;
       });
     }, 1000);
 
-    return () => clearInterval(timer);
-  }, [onTimeout, onTick]);
+    return () => clearInterval(timer); // Clean up on unmount
+  }, [onTick]);
 
   // Trigger timeout when hitting zero
   useEffect(() => {
-    if (timeLeft === 0) {
+    if (localTime === 0) {
       memoizedOnTimeout();
     }
-  }, [timeLeft, memoizedOnTimeout]);
+  }, [localTime, memoizedOnTimeout]);
 
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60)
@@ -56,10 +57,10 @@ export default function CountdownTimer({
   return (
     <div
       className={`bg-stone-100 w-full py-4 px-6 rounded-md text-center text-sm font-mono mb-4 shadow-sm ${
-        timeLeft === 0 ? "text-red-600" : "text-gray-600"
+        localTime === 0 ? "text-red-600" : "text-gray-600"
       }`}
     >
-      Time Left: {formatTime(timeLeft)}
+      Time Left: {formatTime(Math.max(0, localTime))}
     </div>
   );
 }
