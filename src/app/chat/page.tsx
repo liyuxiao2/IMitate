@@ -288,6 +288,7 @@ export default function ChatBot() {
                   setEvaluationResult,
                   setEvaluationScore,
                   setViewMode,
+                  timeLeft,
                 })
               }}
             >

@@ -54,7 +54,7 @@ class EvaluationRequest(BaseModel):
     chatHistory: str
     submittedDiagnosis: str
     submittedAftercare: str
-    time: int
+    timeLeft: int
 
 
 class ScorePayload(BaseModel):
@@ -147,7 +147,7 @@ async def chat_endpoint(request: ChatRequest):
 
 @app.post("/evaluate")
 async def evaluate_performance(request: EvaluationRequest):
-    evaluation_rubric = """
+    evaluation_rubric = f"""
     Scoring Rubric (Total 50 points):
 
     1. Correct Diagnosis (25 pts)  
@@ -176,7 +176,7 @@ async def evaluate_performance(request: EvaluationRequest):
     - Was the line of questioning logical and medically sound?
 
     6. Timing Bonus (2 pts)  
-    - Deduct 0.5 points per minute over {request.} minutes (max deduction at 9 minutes).
+    - Deduct 0.5 points per minute over {request.timeLeft} minutes (max deduction at ({request.timeLeft} + 5 minutes)).
     """
 
     prompt = f"""

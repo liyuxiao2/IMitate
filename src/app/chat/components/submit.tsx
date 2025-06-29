@@ -11,7 +11,8 @@ export async function handleSubmitDiagnosis(
   diagnosisInput: string,
   aftercareInput: string,
   score: number,
-  feedbackText: string
+  feedbackText: string,
+  time: number
 ) {
   try {
     const res = await fetch(apiEndpoints.addScore, {
@@ -46,6 +47,7 @@ export async function handleSubmitDiagnosis(
         submitted_aftercare: aftercareInput,
         score,
         feedback: feedbackText ?? "No History Saved",
+        time: time
       }),
     });
 
@@ -64,6 +66,7 @@ export async function submitEvaluation(
     patient,
     diagnosisInput,
     aftercareInput,
+    timeLeft,
     getChatHistory,
     setIsModalOpen,
     setIsEvaluating,
@@ -74,6 +77,7 @@ export async function submitEvaluation(
     patient: Patient;
     diagnosisInput: string;
     aftercareInput: string;
+    timeLeft: number;
     getChatHistory: () => string;
     setIsModalOpen: (val: boolean) => void;
     setIsEvaluating: (val: boolean) => void;
@@ -99,6 +103,7 @@ export async function submitEvaluation(
     chatHistory,
     submittedDiagnosis: diagnosisInput,
     submittedAftercare: aftercareInput,
+    time: timeLeft
   };
 
   try {
@@ -128,7 +133,8 @@ export async function submitEvaluation(
         diagnosisInput,
         aftercareInput,
         score,
-        feedbackText
+        feedbackText,
+        timeLeft
       );
     }
 
