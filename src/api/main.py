@@ -38,11 +38,16 @@ class PatientData(BaseModel):
     age: int
     sex: str
     pronouns: str
+    height_cm: int
+    weight_kg: int
+    temp_c: float
+    heart_rate_bpm: int
     primary_complaint: str
     personality: str
     symptoms: str
     medical_history: str
     correct_diagnosis: str
+
 
 
 class EvaluationRequest(BaseModel):
