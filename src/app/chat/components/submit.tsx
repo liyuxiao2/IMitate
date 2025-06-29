@@ -103,7 +103,7 @@ export async function submitEvaluation(
     chatHistory,
     submittedDiagnosis: diagnosisInput,
     submittedAftercare: aftercareInput,
-    time: timeLeft
+    timeLeft: timeLeft
   };
 
   try {
