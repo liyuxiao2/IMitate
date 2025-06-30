@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 
 export default function Navigation() {
-  const navItems = ["Career"];
+  const navItems = ["Social"];
 
   const router = useRouter();
 
