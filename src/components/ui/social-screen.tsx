@@ -85,7 +85,7 @@ export default function SocialScreen() {
 
       {/* Content Area */}
       <div className="flex-1 p-12">
-        <div className="max-w-5xl mx-auto">
+        <div className="mx-auto">
           <h1 className="text-5xl font-bold text-[#5d002e] mb-2">Social</h1>
           <p className="text-xl text-gray-600 mb-12">
             Monthly Global Leaderboard
@@ -168,9 +168,9 @@ export default function SocialScreen() {
           </div>
 
           {/* Leaderboard Table */}
-          <div className="space-y-2 overflow-scroll max-h-65 bg-white border-gray-200 p-4 rounded-md">
+          <div className="space-y-2 overflow-scroll max-h-100 bg-white border-gray-200  rounded-md">
             {/* Header */}
-            <div className="sticky top-0grid grid-cols-3 gap-4 px-6 py-3 text-gray-600 font-medium text-lg">
+            <div className="sticky top-0 z-1 bg-mcmaster-maroon text-white grid grid-cols-3 gap-4 px-6 py-3 text-gray-600 font-medium text-lg">
               <div>User</div>
               <div className="text-center">Rank</div>
               <div className="text-right">Total Points</div>
