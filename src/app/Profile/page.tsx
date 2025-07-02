@@ -32,6 +32,7 @@ export default function ProfilePage() {
   // State for editing fields
   const [editingField, setEditingField] = useState<EditableField>(null);
   const [fieldValue, setFieldValue] = useState("");
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -145,12 +146,23 @@ export default function ProfilePage() {
     router.push('/');
   };
 
+  const handleMobileMenuToggle = () => {
+    setIsMobileSidebarOpen(!isMobileSidebarOpen);
+  };
+
+  const handleMobileSidebarClose = () => {
+    setIsMobileSidebarOpen(false);
+  };
+
   return (
     <div className="min-h-screen bg-gray-200 flex">
-      <Sidebar />
+      <Sidebar 
+        isMobileOpen={isMobileSidebarOpen}
+        onMobileClose={handleMobileSidebarClose}
+      />
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
-        <Header />
+        <Header onMobileMenuToggle={handleMobileMenuToggle} />
         <div className="flex-1 p-12">
           <div className="max-w-5xl mx-auto">
             <h1 className="text-5xl font-bold text-mcmaster-maroon mb-16">

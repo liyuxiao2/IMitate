@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { User } from "lucide-react";
-import Header from "./header";
 import { supabase } from "@/lib/supabaseClient";
 
 interface LeaderboardUser {
@@ -70,7 +69,6 @@ export default function SocialScreen() {
   if (loading) {
     return (
       <div className="flex-1 flex flex-col">
-        <Header />
         <div className="flex-1 flex items-center justify-center">
           <p className="text-xl text-gray-600">Loading Leaderboard...</p>
         </div>
@@ -80,9 +78,6 @@ export default function SocialScreen() {
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
-      {/* Header */}
-      <Header />
-
       {/* Content Area */}
       <div className="flex-1 p-12">
         <div className="mx-auto">

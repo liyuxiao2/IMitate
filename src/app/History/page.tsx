@@ -33,9 +33,18 @@ interface CaseHistory {
 
 export default function HistoryPage() {
   const [history, setHistory] = useState<CaseHistory[]>([]);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [selectedFeedback, setSelectedFeedback] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleMobileMenuToggle = () => {
+    setIsMobileSidebarOpen(!isMobileSidebarOpen);
+  };
+
+  const handleMobileSidebarClose = () => {
+    setIsMobileSidebarOpen(false);
+  };
 
   useEffect(() => {
     const fetchHistory = async () => {
@@ -73,15 +82,13 @@ export default function HistoryPage() {
 
   return (
     <div className="min-h-screen bg-gray-100 flex">
-      <Sidebar activePage="History" />
+      <Sidebar 
+        activePage="History" 
+        isMobileOpen={isMobileSidebarOpen}
+        onMobileClose={handleMobileSidebarClose}
+      />
       <div className="flex-1 flex flex-col">
-        {/* Replace or wrap Header with your maroon bar if desired */}
-        <div className="bg-mcmaster-maroon px-8 py-4 flex justify-end">
-          {/* Example profile link */}
-          {/* <Link href="/Profile">…</Link> */}
-        </div>
-
-        <Header />
+        <Header onMobileMenuToggle={handleMobileMenuToggle} />
 
         <main className="flex-1 p-12">
           <h1 className="text-5xl font-bold text-mcmaster-maroon mb-4 stic">

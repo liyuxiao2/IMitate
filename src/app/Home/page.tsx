@@ -1,3 +1,5 @@
+"use client";
+
 import Header from "@/components/ui/header";
 import HeroSection from "@/components/ui/hero-section";
 

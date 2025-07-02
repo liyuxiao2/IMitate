@@ -66,6 +66,7 @@ export default function ChatBot() {
 
   const [isEvaluating, setIsEvaluating] = useState(false);
   const [isIntroModalOpen, setIsIntroModalOpen] = useState(false);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   const totalTime = 600;
   const [timeLeft, setTimeLeft] = useState(totalTime);
@@ -80,6 +81,13 @@ export default function ChatBot() {
     setEvaluationResult("❌ You ran out of time.");
   }, []);
 
+  const handleMobileMenuToggle = () => {
+    setIsMobileSidebarOpen(!isMobileSidebarOpen);
+  };
+
+  const handleMobileSidebarClose = () => {
+    setIsMobileSidebarOpen(false);
+  };
 
   useEffect(() => {
     loadPatient({
@@ -218,7 +226,11 @@ export default function ChatBot() {
 
   return (
     <div className="flex h-screen bg-stone-200 font-sans">
-      <Sidebar activePage="Practice"/>
+      <Sidebar 
+        activePage="Practice" 
+        isMobileOpen={isMobileSidebarOpen}
+        onMobileClose={handleMobileSidebarClose}
+      />
       {/* Modals and Overlays */}
       {isEvaluating && (
         <div className="fixed inset-0 bg-white bg-opacity-90 z-50 flex flex-col items-center justify-center">
@@ -356,7 +368,7 @@ export default function ChatBot() {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
-        <Header />
+        <Header onMobileMenuToggle={handleMobileMenuToggle} />
 
         <main className="flex-1 overflow-y-auto p-6">
           {viewMode === "chat" ? (
