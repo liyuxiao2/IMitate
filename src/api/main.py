@@ -59,12 +59,12 @@ class EvaluationRequest(BaseModel):
 
 
 class ScorePayload(BaseModel):
-    score: int
+    score: float
 
 
 class ScoreUpdate(BaseModel):
     uid: str  # matches users.id (UUID)
-    score: int  # amount to add
+    score: float  # amount to add
 
 
 class ProfilePictureUpdate(BaseModel):
@@ -73,13 +73,13 @@ class ProfilePictureUpdate(BaseModel):
 
 class LeaderboardEntry(BaseModel):
     username: str
-    total_score: int
+    total_score: float
     profile_picture_url: str
 
 
 class AddMatchPayload(BaseModel):
     patient_info: dict  # use dict if you are directly passing a JSON object
-    score: int
+    score: float
     submitted_diagnosis: str
     submitted_aftercare: str
     feedback: str
@@ -94,7 +94,7 @@ class HistoryEntry(BaseModel):
     id: int
     user_id: str
     patient_info: dict
-    score: int
+    score: float
     submitted_diagnosis: str
     submitted_aftercare: str
     feedback: str
@@ -149,6 +149,7 @@ async def chat_endpoint(request: ChatRequest):
 
 @app.post("/evaluate")
 async def evaluate_performance(request: EvaluationRequest):
+    timing_score = 2 * (request.timeLeft / request.totalTime)
     evaluation_rubric = f"""
     Scoring Rubric (Total 50 points):
 
@@ -178,7 +179,7 @@ async def evaluate_performance(request: EvaluationRequest):
     - Was the line of questioning logical and medically sound?
 
     6. Timing Bonus (2 pts)  
-    - Deduct (2/({request.totalTime}/60)) points per minute used: (({request.totalTime}-{request.timeLeft}) / 60),  (max deduction if time is over {request.totalTime} seconds).
+    - Deduct {timing_score} out of 2 points,  (0 points if time is over {request.totalTime} seconds).
     """
 
     prompt = f"""

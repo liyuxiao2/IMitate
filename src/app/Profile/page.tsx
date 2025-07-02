@@ -1,9 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { User, Edit, Camera, Check, X } from "lucide-react";
+import { User} from "lucide-react";
 import Sidebar from "@/components/ui/sidebar";
 import Header from "@/components/ui/header";
 
@@ -14,8 +12,9 @@ import {
   uploadProfilePicture,
   updateProfilePictureUrl,
 } from "@/lib/profileUtils";
+import EditableField from "./edit";
 
-type EditableField = "username" | "full_name" | null;
+export type EditableField = "username" | "full_name" | "email" | null;
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState({
@@ -24,6 +23,7 @@ export default function ProfilePage() {
     username: "",
     email: "",
     profile_picture_url: "",
+    total_score: "",
   });
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -45,6 +45,8 @@ export default function ProfilePage() {
         .select("*") // Select all fields to get the ID
         .eq("id", session.user.id)
         .single();
+
+      console.log(profileData);
 
       if (profileData) {
         setProfile(profileData);
@@ -154,121 +156,57 @@ export default function ProfilePage() {
               <div className="col-span-2 space-y-12">
                 {/* Display Name */}
                 <div className="space-y-3">
-                  <Label className="text-xl font-medium text-mcmaster-maroon">
-                    Display Name
-                  </Label>
-                  <div className="relative">
-                    <Input
-                      value={
-                        editingField === "full_name"
-                          ? fieldValue
-                          : profile.full_name
-                      }
-                      onChange={(e) =>
-                        editingField === "full_name" &&
-                        setFieldValue(e.target.value)
-                      }
-                      className="bg-gray-300 border-0 text-gray-800 text-xl py-4 pr-24 rounded-full w-full"
-                      readOnly={editingField !== "full_name"}
-                    />
-                    {editingField === "full_name" ? (
-                      <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
-                        <Button
-                          onClick={handleSave}
-                          variant="ghost"
-                          size="icon"
-                          className="text-green-600 hover:text-green-700 h-10 w-10"
-                        >
-                          <Check className="w-5 h-5" />
-                        </Button>
-                        <Button
-                          onClick={handleCancel}
-                          variant="ghost"
-                          size="icon"
-                          className="text-red-600 hover:text-red-700 h-10 w-10"
-                        >
-                          <X className="w-5 h-5" />
-                        </Button>
-                      </div>
-                    ) : (
-                      <Button
-                        onClick={() =>
-                          handleEdit("full_name", profile.full_name)
-                        }
-                        variant="ghost"
-                        size="icon"
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 hover:text-gray-800 h-10 w-10"
-                      >
-                        <Edit className="w-5 h-5" />
-                      </Button>
-                    )}
-                  </div>
-                </div>
+                  <EditableField
+                    label="Display Name"
+                    fieldKey="full_name"
+                    value={profile.full_name}
+                    editingField={editingField ?? ""}
+                    onEdit={handleEdit}
+                    onSave={handleSave}
+                    onCancel={handleCancel}
+                    fieldValue={fieldValue}
+                    setFieldValue={setFieldValue}
+                    allowEdit={true}
+                  />
 
-                {/* Username */}
-                <div className="space-y-3">
-                  <Label className="text-xl font-medium text-mcmaster-maroon">
-                    Username
-                  </Label>
-                  <div className="relative">
-                    <Input
-                      value={
-                        editingField === "username"
-                          ? fieldValue
-                          : profile.username
-                      }
-                      onChange={(e) =>
-                        editingField === "username" &&
-                        setFieldValue(e.target.value)
-                      }
-                      className="bg-gray-300 border-0 text-gray-800 text-xl py-4 pr-24 rounded-full w-full"
-                      readOnly={editingField !== "username"}
-                    />
-                    {editingField === "username" ? (
-                      <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
-                        <Button
-                          onClick={handleSave}
-                          variant="ghost"
-                          size="icon"
-                          className="text-green-600 hover:text-green-700 h-10 w-10"
-                        >
-                          <Check className="w-5 h-5" />
-                        </Button>
-                        <Button
-                          onClick={handleCancel}
-                          variant="ghost"
-                          size="icon"
-                          className="text-red-600 hover:text-red-700 h-10 w-10"
-                        >
-                          <X className="w-5 h-5" />
-                        </Button>
-                      </div>
-                    ) : (
-                      <Button
-                        onClick={() => handleEdit("username", profile.username)}
-                        variant="ghost"
-                        size="icon"
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 hover:text-gray-800 h-10 w-10"
-                      >
-                        <Edit className="w-5 h-5" />
-                      </Button>
-                    )}
-                  </div>
-                </div>
+                  <EditableField
+                    label="Username"
+                    fieldKey="username"
+                    value={profile.username}
+                    editingField={editingField ?? ""}
+                    onEdit={handleEdit}
+                    onSave={handleSave}
+                    onCancel={handleCancel}
+                    fieldValue={fieldValue}
+                    setFieldValue={setFieldValue}
+                    allowEdit={true}
+                  />
 
-                {/* Email */}
-                <div className="space-y-3">
-                  <Label className="text-xl font-medium text-mcmaster-maroon">
-                    E-Mail
-                  </Label>
-                  <div className="relative">
-                    <Input
-                      value={profile.email}
-                      className="bg-gray-300 border-0 text-gray-800 text-xl py-4 pr-14 rounded-full w-full"
-                      readOnly
-                    />
-                    {/* No Edit Button for Email */}
-                  </div>
+                  <EditableField
+                    label="E-Mail"
+                    fieldKey="email"
+                    value={profile.email}
+                    editingField={editingField ?? ""}
+                    onEdit={() => {}}
+                    onSave={() => {}}
+                    onCancel={() => {}}
+                    fieldValue={profile.email}
+                    setFieldValue={() => {}}
+                    allowEdit={false}
+                  />
+
+                  <EditableField
+                    label="Score"
+                    fieldKey="email"
+                    value={profile.total_score}
+                    editingField={editingField ?? ""}
+                    onEdit={() => {}}
+                    onSave={() => {}}
+                    onCancel={() => {}}
+                    fieldValue={profile.total_score}
+                    setFieldValue={() => {}}
+                    allowEdit={false}
+                  />
                 </div>
               </div>
 
@@ -283,20 +221,6 @@ export default function ProfilePage() {
                       </AvatarFallback>
                     </Avatar>
                   </div>
-
-                  {/* Upload overlay */}
-                  <button
-                    onClick={triggerFileUpload}
-                    disabled={isUploading}
-                    className="absolute bottom-4 right-4 w-12 h-12 bg-mcmaster-maroon rounded-full flex items-center justify-center text-white hover:bg-mcmaster-light transition-colors disabled:opacity-50"
-                    title="Upload profile picture"
-                  >
-                    {isUploading ? (
-                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    ) : (
-                      <Camera className="w-5 h-5" />
-                    )}
-                  </button>
                 </div>
 
                 <input
