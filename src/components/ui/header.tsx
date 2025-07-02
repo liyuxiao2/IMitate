@@ -2,11 +2,16 @@
 
 import React, { useState, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "./avatar";
-import { User } from "lucide-react";
+import { User, Menu } from "lucide-react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient";
+import { Button } from "./button";
 
-export default function Header() {
+interface HeaderProps {
+  onMobileMenuToggle?: () => void;
+}
+
+export default function Header({ onMobileMenuToggle }: HeaderProps) {
   const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(
     null,
   );
@@ -39,7 +44,23 @@ export default function Header() {
   }, []);
 
   return (
-    <div className="bg-mcmaster-maroon px-8 py-4 flex justify-end">
+    <div className={`bg-mcmaster-maroon px-8 py-4 flex items-center ${onMobileMenuToggle ? 'justify-between' : 'justify-end'}`}>
+      {/* Hamburger Menu Button - Only visible on mobile when onMobileMenuToggle is provided */}
+      {onMobileMenuToggle && (
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onMobileMenuToggle}
+          className="md:hidden text-white hover:bg-white/20"
+        >
+          <Menu className="w-10 h-10 text-white" />
+        </Button>
+      )}
+
+      {/* Spacer for desktop - keeps profile on the right when hamburger is present */}
+      {onMobileMenuToggle && <div className="hidden md:block" />}
+
+      {/* Profile Avatar */}
       <Link href="/Profile">
         <Avatar className="w-10 h-10 cursor-pointer hover:scale-105 transition-transform">
           <AvatarImage src={profilePictureUrl || undefined} />
