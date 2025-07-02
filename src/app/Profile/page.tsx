@@ -13,10 +13,11 @@ import {
   updateProfilePictureUrl,
 } from "@/lib/profileUtils";
 import EditableField from "./edit";
-
+import { useRouter } from "next/navigation";
 export type EditableField = "username" | "full_name" | "email" | null;
 
 export default function ProfilePage() {
+  const router = useRouter();
   const [profile, setProfile] = useState({
     id: "",
     full_name: "",
@@ -139,6 +140,11 @@ export default function ProfilePage() {
     fileInputRef.current?.click();
   };
 
+  const handleLogout = async () => {
+    await supabase.auth.signOut({ scope: 'local' });
+    router.push('/');
+  };
+
   return (
     <div className="min-h-screen bg-gray-200 flex">
       <Sidebar />
@@ -238,6 +244,9 @@ export default function ProfilePage() {
                 >
                   {isUploading ? "UPLOADING..." : "CHANGE PHOTO"}
                 </Button>
+                <div className="p-1">
+                  <Button className="bg-[#5d002e] w-20 h-10 font-bold" variant={"destructive"} onClick={handleLogout}> Logout </Button>
+                </div>
               </div>
             </div>
           </div>

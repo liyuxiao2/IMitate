@@ -218,6 +218,7 @@ export default function ChatBot() {
 
   return (
     <div className="flex h-screen bg-stone-200 font-sans">
+      <Sidebar activePage="Practice"/>
       {/* Modals and Overlays */}
       {isEvaluating && (
         <div className="fixed inset-0 bg-white bg-opacity-90 z-50 flex flex-col items-center justify-center">
@@ -352,8 +353,6 @@ export default function ChatBot() {
           </div>
         </div>
       )}
-
-      <Sidebar />
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
