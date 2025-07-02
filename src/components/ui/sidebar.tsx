@@ -24,6 +24,11 @@ export default function Sidebar({ activePage, isMobileOpen = false, onMobileClos
     { name: "History", href: "/History", icon: History },
   ];
 
+  const handleLogout = async () => {
+    await supabase.auth.signOut({ scope: 'local' });
+    router.push('/')
+  }
+
 
 
   // Handle click outside to close mobile sidebar
@@ -106,6 +111,9 @@ export default function Sidebar({ activePage, isMobileOpen = false, onMobileClos
           </div>
         </nav>
 
+        <div className="p-1">
+          <Button className="bg-[#5d002e] w-20 h-10 font-bold" variant={"destructive"} onClick={handleLogout}> Logout </Button>
+        </div>
         
       </div>
     </>
