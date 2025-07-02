@@ -88,7 +88,7 @@ export default function HistoryPage() {
             History
           </h1>
 
-          <div className="bg-white rounded-lg shadow-md overflow-scroll max-h-150">
+          <div className="bg-white rounded-lg shadow-md overflow-scroll max-h-200">
             <table className="min-w-full">
               <thead className="sticky top-0 bg-mcmaster-maroon text-white">
                 <tr>

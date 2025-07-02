@@ -3,17 +3,28 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Dumbbell, Users, History } from "lucide-react";
+import { Button } from "./button";
+import { supabase } from "@/lib/supabaseClient";
+
+import { useRouter } from 'next/navigation'
 
 interface SidebarProps {
   activePage?: "Practice" | "Social" | "History";
 }
 
 export default function Sidebar({ activePage }: SidebarProps) {
+  const router =  useRouter();
+
   const navItems = [
     { name: "Practice", href: "/chat", icon: Dumbbell },
-    { name: "Social", href: "/Career", icon: Users },
+    { name: "Social", href: "/Social", icon: Users },
     { name: "History", href: "/History", icon: History },
   ];
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut({ scope: 'local' });
+    router.push('/')
+  }
 
   return (
     <div className="w-64 bg-mcmaster-maroon text-white flex-col shrink-0 hidden md:flex">
@@ -49,6 +60,11 @@ export default function Sidebar({ activePage }: SidebarProps) {
           ))}
         </div>
       </nav>
+
+      {/* Logout */}
+      <div className="p-1">
+        <Button className="bg-[#5d002e] w-20 h-10 font-bold" variant={"destructive"} onClick={handleLogout}> Logout </Button>
+      </div>
     </div>
   );
 }
