@@ -142,6 +142,11 @@ export default function ChatBot() {
     }
   };
 
+  // const handleSpeechClick = async () => {
+
+  // }
+
+  
   const handleMicClick = async () => {
     if (!isListening) {
       setIsListening(true);
